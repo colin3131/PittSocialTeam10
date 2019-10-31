@@ -127,6 +127,7 @@ $$ LANGUAGE 'plpgsql';
 
 -- When a pendingGroupMember is added, make sure they aren't already 
 -- in the group
+DROP TRIGGER IF EXISTS pendingGroup_already_member;
 CREATE TRIGGER pendingGroup_already_member
     BEFORE INSERT
     on pendingGroupMember
