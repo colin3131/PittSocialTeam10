@@ -1,8 +1,8 @@
 -- PittSocial Triggers
 
--- Check that the new friends were previously pendingfriends
-CREATE TRIGGER friends_from_pending_check
-    BEFORE INSERT
+-- Delete pendingFriends on insert to friends if they were previously pendingFriends
+CREATE TRIGGER friends_delete_pending
+    AFTER INSERT
     ON friend
     FOR EACH ROW
     EXECUTE PROCEDURE pendingFriend_check();
@@ -13,13 +13,21 @@ $$
 BEGIN
     IF EXISTS (SELECT FROM pendingFriend p 
                 WHERE new.userID1=p.fromID
-                    AND new.userID2=p.toID
-                     OR new.userID1=p.toID
-                    AND new.userID2=p.fromID) THEN
-        return new;
-    ELSE
-        return null;
+                    AND new.userID2=p.toID) THEN
+
+        DELETE FROM pendingFriend p
+            WHERE new.userID1=p.toID
+            AND new.userID2=p.fromID;
+
+    ELSE IF EXISTS (SELECT FROM pendingFriend p 
+                    WHERE new.userID1=p.fromID
+                    AND new.userID2=p.toID) THEN
+
+        DELETE FROM pendingFriend p
+            WHERE new.userID1=p.fromID
+            AND new.userID2=p.toID;
     end if;
+    return new;
 END
 $$ LANGUAGE 'plpgsql';
 
