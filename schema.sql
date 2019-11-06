@@ -1,3 +1,5 @@
+-- The following creates tables w/ constraints for the 1555 project
+
 drop table if exists profile cascade;
 drop table if exists friend cascade;
 drop table if exists pendingFriend cascade;
@@ -8,15 +10,15 @@ drop table if exists groupMember cascade;
 drop table if exists pendingGroupMember cascade;
 
 create table profile
-(
+(   -- Assumes all must be entered by the user (not null)
     userID          integer,
     name            varchar(50) NOT NULL
-        check (name LIKE '% %'),
+        check (name LIKE '% %'),            -- Assumes they must enter a first and last name
     email           varchar(50) NOT NULL
-        check (email LIKE '%@%.___'),
+        check (email LIKE '%@%.___'),       -- Assumes they must enter an email with something@something.(3 extention)
     password        varchar(50) NOT NULL,
     date_of_birth   date NOT NULL
-        check (date_of_birth >= '1/1/1901' AND date_of_birth <= current_date),
+        check (date_of_birth >= '1/1/1901' AND date_of_birth <= current_date), -- Assumes they were not born before 1901
     lastlogin       timestamp NOT NULL,
 
     CONSTRAINT profile_pk Primary Key (userID),
@@ -24,11 +26,11 @@ create table profile
 );
 
 create table friend
-(
+(   -- Assumes all must be entered by the user (not null)
     userID1         integer NOT NULL,
     userID2         integer NOT NULL,
     JDate           date NOT NULL
-        check (JDate <= current_date),
+        check (JDate <= current_date),      -- Assumes the date must be before the present time
     message         varchar(200) NOT NULL,
 
     CONSTRAINT friend_pk Primary Key (userID1, userID2),
@@ -37,7 +39,7 @@ create table friend
 );
 
 create table pendingFriend
-(
+(   -- Assumes all must be entered by the user (not null)
     fromID          integer NOT NULL,
     toID            integer NOT NULL,
     message         varchar(200) NOT NULL,
@@ -48,7 +50,7 @@ create table pendingFriend
 );
 
 create table "group"
-(
+(   -- Assumes gID, name, and limit must be entered by the user (not null)
     gID             integer NOT NULL,
     name            varchar(50) NOT NULL,
     "limit"           integer NOT NULL,
@@ -58,16 +60,15 @@ create table "group"
     CONSTRAINT group_uq Unique (name)
 );
 
--- DO A COUPLE CONSTAINT CHECKS STILL
 create table message
-(
+(   -- Assumes msgID, fromID, message, and timeSent must be entered by the user (not null)
     msgID           integer NOT NULL,
     fromID          integer NOT NULL,
     message         varchar(200) NOT NULL,
     toUserID        integer DEFAULT NULL,
     toGroupID       integer DEFAULT NULL,
     timeSent        timestamp NOT NULL
-        check (timeSent <= current_timestamp),
+        check (timeSent <= current_timestamp), -- Assumes timeSent must be before the current time
 
     CONSTRAINT message_pk Primary Key (msgID),
     CONSTRAINT message_fk foreign Key (fromID) references profile (userID),
@@ -76,7 +77,7 @@ create table message
 );
 
 create table messageRecipient
-(
+(   -- Assumes all must be entered by the user (not null)
     msgID           integer NOT NULL,
     userID          integer NOT NULL,
 
@@ -86,11 +87,11 @@ create table messageRecipient
 );
 
 create table groupMember
-(
+(   -- Assumes all must be entered by the user (not null)
     gID             integer NOT NULL,
     userID          integer NOT NULL,
     role            varchar(20) NOT NULL
-        check (role = 'manager' OR role = 'member'),
+        check (role = 'manager' OR role = 'member'), -- Assumes the only roles allowed are manager or member
 
     CONSTRAINT groupMember_pk Primary Key (gID, userID),
     CONSTRAINT groupMember_fk foreign Key (gID) references "group" (gID),
@@ -98,7 +99,7 @@ create table groupMember
 );
 
 create table pendingGroupMember
-(
+(   -- Assumes all must be entered by the user (not null)
     gID             integer NOT NULL,
     userID          integer NOT NULL,
     message         varchar(200) NOT NULL,
