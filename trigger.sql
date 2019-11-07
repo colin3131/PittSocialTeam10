@@ -35,7 +35,7 @@ CREATE TRIGGER friend_delete_pendingFriend
     EXECUTE PROCEDURE pendingFriend_check();
 --
 -- TRIGGER 2
--- Make sure they aren't already friends. If they are, don't insert.
+-- Make sure they aren't already friends. If they are, don't insert. 
 -- ASSUMPTION: We do not want to keep track of duplicate (reversed) friendships
 CREATE OR REPLACE FUNCTION friend_check()
     RETURNS trigger AS

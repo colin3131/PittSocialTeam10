@@ -1,4 +1,4 @@
--- The following creates tables w/ constraints for the 1555 project
+-- The following creates tables w/ constraints for the 1555 project 
 
 drop table if exists profile cascade;
 drop table if exists friend cascade;
