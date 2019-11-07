@@ -1,6 +1,8 @@
 -- PittSocial Triggers
-
+--
+-- TRIGGER 1:
 -- Delete pendingFriends on insert to friends if they were previously pendingFriends
+-- ASSUMPTION: once friends, you can no longer be pending friendship
 CREATE OR REPLACE FUNCTION pendingFriend_check()
     RETURNS trigger AS
 $$
@@ -31,9 +33,10 @@ CREATE TRIGGER friend_delete_pendingFriend
     ON friend
     FOR EACH ROW
     EXECUTE PROCEDURE pendingFriend_check();
-
--- WORKS --
+--
+-- TRIGGER 2
 -- Make sure they aren't already friends. If they are, don't insert.
+-- ASSUMPTION: We do not want to keep track of duplicate (reversed) friendships
 CREATE OR REPLACE FUNCTION friend_check()
     RETURNS trigger AS
 $$
@@ -54,9 +57,10 @@ CREATE TRIGGER friend_already_friends
     ON friend
     FOR EACH ROW
     EXECUTE PROCEDURE friend_check();
-
--- WORKS --
+--
+-- TRIGGER 3
 -- Check that the newly pending friends aren't already friends
+-- ASSUMPTION: you cannot attempt to friend someone twice
 CREATE OR REPLACE FUNCTION friend_already_check()
     RETURNS trigger AS
 $$
@@ -79,10 +83,10 @@ CREATE TRIGGER pendingFriend_already_friends
     ON pendingFriend
     FOR EACH ROW
     EXECUTE PROCEDURE friend_already_check();
-
--- WORKS --
--- If a pendingFriend request comes in from the toID of another pendingFriend, 
--- make them friends
+--
+-- TRIGGER 4
+-- If a pendingFriend request comes in from the toID of another pendingFriend, make them friends
+-- ASSUMPTION: If both want to be friends, it makes them a friend
 CREATE OR REPLACE FUNCTION makeFriend()
     RETURNS TRIGGER AS
 $$
@@ -110,9 +114,10 @@ CREATE TRIGGER pendingFriend_make_friends
     ON pendingFriend
     FOR EACH ROW
     EXECUTE PROCEDURE makeFriend();
-
--- WORKING --
+--
+-- TRIGGER 5:
 -- When a message is made to a user, add it to the messageRecipient table
+-- ASSUMPTION: we want to automatically keep track of all message recipients when a message is inserted
 CREATE OR REPLACE FUNCTION addRecipient()
     RETURNS TRIGGER AS
 $$
@@ -130,10 +135,10 @@ CREATE TRIGGER message_addRecipient_User
     FOR EACH ROW
     WHEN (NEW.toGroupID IS NULL)
     EXECUTE PROCEDURE addRecipient();
-
--- WORKS --
--- When a pendingGroupMember is added, make sure they aren't already 
--- in the group
+--
+-- TRIGGER 6:
+-- When a pendingGroupMember is added, make sure they aren't already in the group
+-- ASSUMPTION: If already in a group, they cannot request to be in it again
 CREATE OR REPLACE FUNCTION checkGroupMembers()
     RETURNS TRIGGER AS
 $$
@@ -156,10 +161,10 @@ CREATE TRIGGER pendingGroup_already_member
     on pendingGroupMember
     FOR EACH ROW
     EXECUTE PROCEDURE checkGroupMembers();
-
--- WORKS --
--- When a groupMember is added, delete the pendingGroupMember if they
--- were pending
+--
+-- TRIGGER 7:
+-- When a groupMember is added, delete the pendingGroupMember if they were pending
+-- ASSUMPTION: We don't want to keep track of past pending members if they are already in a group
 CREATE OR REPLACE FUNCTION pendingGroupMember_check()
     RETURNS trigger AS
 $$
@@ -181,8 +186,10 @@ CREATE TRIGGER groupMember_delete_pending
     ON groupMember
     FOR EACH ROW
     EXECUTE PROCEDURE pendingGroupMember_check();
-
+--
+-- TRIGGER 8:
 -- On the creation of a message, make sure toUserID or toGroupID is null, but not both
+-- ASSUMPTION: A message can only be sent to either a user or group
 CREATE OR REPLACE FUNCTION message_Null_ID_Check()
     RETURNS trigger AS
 $$
@@ -203,8 +210,10 @@ CREATE TRIGGER message_check_NULL_ID
     ON "message"
     FOR EACH ROW
     EXECUTE PROCEDURE message_Null_ID_Check();
-
+--
+-- TRIGGER 9:
 -- Don't permit an insert on groupMembers if it would violate the group limit
+-- ASSUMPTION: We must enforce the group limits
 CREATE OR REPLACE FUNCTION groupMember_over_limit()
     RETURNS trigger AS
 $$
