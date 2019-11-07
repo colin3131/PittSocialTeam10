@@ -181,3 +181,52 @@ CREATE TRIGGER groupMember_delete_pending
     ON groupMember
     FOR EACH ROW
     EXECUTE PROCEDURE pendingGroupMember_check();
+
+-- On the creation of a message, make sure toUserID or toGroupID is null, but not both
+CREATE OR REPLACE FUNCTION message_Null_ID_Check()
+    RETURNS trigger AS
+$$
+BEGIN
+    IF NEW.toUserID IS NULL AND NEW.toGroupID IS NOT NULL THEN
+        return NEW;
+    ELSIF NEW.toUserID IS NOT NULL AND NEW.toGroupID IS NULL THEN
+        return NEW;
+    ELSE
+        RETURN NULL;
+    END IF;
+END;
+$$ LANGUAGE 'plpgsql';
+
+DROP TRIGGER IF EXISTS message_check_NULL_ID on "message";
+CREATE TRIGGER message_check_NULL_ID
+    BEFORE INSERT
+    ON "message"
+    FOR EACH ROW
+    EXECUTE PROCEDURE message_Null_ID_Check();
+
+-- Don't permit an insert on groupMembers if it would violate the group limit
+CREATE OR REPLACE FUNCTION groupMember_over_limit()
+    RETURNS trigger AS
+$$
+DECLARE
+    ilimit integer := (SELECT "limit"
+                        FROM "group" g
+                        WHERE NEW.gID=g.gID);
+    imembers integer := (SELECT count(*)
+                            FROM groupMember gm
+                            WHERE NEW.gID=gm.gID);
+BEGIN
+    IF imembers < ilimit THEN
+        return NEW;
+    ELSE
+        return NULL;
+    END IF;
+END;
+$$ LANGUAGE 'plpgsql';
+
+DROP TRIGGER IF EXISTS groupMember_Limit_Check on groupMember;
+CREATE TRIGGER groupMember_Limit_Check
+    BEFORE INSERT
+    ON groupMember
+    FOR EACH ROW
+    EXECUTE PROCEDURE groupMember_over_limit();
