@@ -239,3 +239,64 @@ CREATE TRIGGER groupMember_Limit_Check
     ON groupMember
     FOR EACH ROW
     EXECUTE PROCEDURE groupMember_over_limit();
+
+-- TRIGGER 10:
+-- When a message is sent to a group, add a messageRecipient for each groupMember
+-- ASSUMPTION: Each group member should get a message sent to a group.
+CREATE OR REPLACE FUNCTION addGroupRecipient()
+    RETURNS TRIGGER AS
+$$
+DECLARE
+    cur_groupMembers CURSOR(grID INTEGER) FOR SELECT userID
+                                FROM groupMember gm
+                                WHERE gm.gID=grID;
+    rec_groupMember RECORD;
+BEGIN
+    OPEN cur_groupMembers(NEW.toGroupID);
+    LOOP
+        FETCH cur_groupMembers INTO rec_groupMember;
+        EXIT WHEN NOT FOUND;
+
+        INSERT INTO messageRecipient VALUES(NEW.msgID, rec_groupMember.userID);
+    END LOOP;
+    CLOSE cur_groupMembers;
+    RETURN NEW;
+END;
+$$ LANGUAGE 'plpgsql';
+
+DROP TRIGGER IF EXISTS message_addGroup_Recipient on messageInfo;
+CREATE TRIGGER message_addRecipient_User
+    AFTER INSERT
+    ON messageInfo
+    FOR EACH ROW
+    WHEN (NEW.toUserID IS NULL)
+    EXECUTE PROCEDURE addRecipient();
+
+-- TRIGGER 11:
+-- When a User is deleted, they should be removed from all of their groups.
+-- ASSUMPTION: A User is no longer in a group if their account is deleted.
+CREATE OR REPLACE FUNCTION removeUserFromGroups()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    DELETE FROM groupMember gm
+    WHERE NEW.userID=gm.userID;
+    RETURN NEW;
+END;
+$$ LANGUAGE 'plpgsql';
+
+DROP TRIGGER IF EXISTS user_remove_from_groups on profile;
+CREATE TRIGGER user_remove_from_groups
+    BEFORE DELETE
+    ON profile
+    FOR EACH ROW
+    EXECUTE PROCEDURE removeUserFromGroups();
+
+-- TRIGGER 12: [TODO]
+-- When a User is deleted, delete all messages where the from and to users are deleted.
+-- ASSUMPTION: If neither user is on the system anymore, no one can view the messages, so they should be removed.
+
+
+-- TRIGGER 13: [TODO]
+-- When a User is deleted, delete their entries in the messageRecipient table.
+-- ASSUMPTION: If a user isn't on the system anymore, they can't view their messages
