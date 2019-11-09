@@ -128,10 +128,10 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
-DROP TRIGGER IF EXISTS message_addRecipient_User on "message";
+DROP TRIGGER IF EXISTS message_addRecipient_User on messageInfo;
 CREATE TRIGGER message_addRecipient_User
     AFTER INSERT
-    ON "message"
+    ON messageInfo
     FOR EACH ROW
     WHEN (NEW.toGroupID IS NULL)
     EXECUTE PROCEDURE addRecipient();
@@ -204,10 +204,10 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
-DROP TRIGGER IF EXISTS message_check_NULL_ID on "message";
+DROP TRIGGER IF EXISTS message_check_NULL_ID on messageInfo;
 CREATE TRIGGER message_check_NULL_ID
     BEFORE INSERT
-    ON "message"
+    ON messageInfo
     FOR EACH ROW
     EXECUTE PROCEDURE message_Null_ID_Check();
 --
@@ -218,8 +218,8 @@ CREATE OR REPLACE FUNCTION groupMember_over_limit()
     RETURNS trigger AS
 $$
 DECLARE
-    ilimit integer := (SELECT "limit"
-                        FROM "group" g
+    ilimit integer := (SELECT size
+                        FROM groupInfo g
                         WHERE NEW.gID=g.gID);
     imembers integer := (SELECT count(*)
                             FROM groupMember gm

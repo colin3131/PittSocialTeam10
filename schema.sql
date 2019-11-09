@@ -3,9 +3,9 @@
 drop table if exists profile cascade;
 drop table if exists friend cascade;
 drop table if exists pendingFriend cascade;
-drop table if exists message cascade;
+drop table if exists messageInfo cascade;
 drop table if exists messageRecipient cascade;
-drop table if exists "group" cascade;
+drop table if exists groupInfo cascade;
 drop table if exists groupMember cascade;
 drop table if exists pendingGroupMember cascade;
 
@@ -49,18 +49,18 @@ create table pendingFriend
     CONSTRAINT pendingFriend_fk2 foreign Key (toID) references profile (userID)
 );
 
-create table "group"
-(   -- Assumes gID, name, and limit must be entered by the user (not null)
+create table groupInfo
+(   -- Assumes gID, name, and size must be entered by the user (not null)
     gID             integer NOT NULL,
     name            varchar(50) NOT NULL,
-    "limit"           integer NOT NULL,
+    size           integer NOT NULL,
     description     varchar(200) DEFAULT NULL,
 
     CONSTRAINT group_pk Primary Key (gID),
     CONSTRAINT group_uq Unique (name)
 );
 
-create table message
+create table messageInfo
 (   -- Assumes msgID, fromID, message, and timeSent must be entered by the user (not null)
     msgID           integer NOT NULL,
     fromID          integer NOT NULL,
@@ -73,7 +73,7 @@ create table message
     CONSTRAINT message_pk Primary Key (msgID),
     CONSTRAINT message_fk foreign Key (fromID) references profile (userID),
     CONSTRAINT message_fk2 foreign Key (toUserID) references profile (userID),
-    CONSTRAINT message_fk3 foreign Key (toGroupID) references "group" (gID)
+    CONSTRAINT message_fk3 foreign Key (toGroupID) references groupInfo (gID)
 );
 
 create table messageRecipient
@@ -82,7 +82,7 @@ create table messageRecipient
     userID          integer NOT NULL,
 
     CONSTRAINT messageRecipient_pk Primary Key (msgID),
-    CONSTRAINT messageRecipient_fk foreign Key (msgID) references message(msgID),
+    CONSTRAINT messageRecipient_fk foreign Key (msgID) references messageInfo(msgID),
     CONSTRAINT messageRecipient_fk2 foreign Key (userID) references profile(userID)
 );
 
@@ -94,7 +94,7 @@ create table groupMember
         check (role = 'manager' OR role = 'member'), -- Assumes the only roles allowed are manager or member
 
     CONSTRAINT groupMember_pk Primary Key (gID, userID),
-    CONSTRAINT groupMember_fk foreign Key (gID) references "group" (gID),
+    CONSTRAINT groupMember_fk foreign Key (gID) references groupInfo (gID),
     CONSTRAINT groupMember_fk2 foreign Key (userID) references profile(userID)
 );
 
@@ -105,6 +105,6 @@ create table pendingGroupMember
     message         varchar(200) NOT NULL,
 
     CONSTRAINT pendingGroupMember_pk Primary Key (gID, userID),
-    CONSTRAINT pendingGroupMember_fk foreign Key (gID) references "group" (gID),
+    CONSTRAINT pendingGroupMember_fk foreign Key (gID) references groupInfo (gID),
     CONSTRAINT pendingGroupMember_fk2 foreign Key (userID) references profile(userID)
 );
