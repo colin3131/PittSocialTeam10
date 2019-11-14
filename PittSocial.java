@@ -1,3 +1,4 @@
+import java.sql.*;
 import java.util.Scanner;
 
 /** This is the PittSocial 1555 Application
@@ -36,6 +37,35 @@ public class PittSocial
 	{
 		login = false;
 		run = true;
+		boolean Connection = false;
+		while(!Connection)
+		{
+			Scanner kbd = new Scanner(System.in);
+			System.out.print("Enter your DBMS username: ");
+			String DBuser = kbd.nextLine();
+			System.out.print("Enter your DBMS password: ");
+			String DBpass = kbd.nextLine();
+			
+			// auto close connection
+	        try (Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/", DBuser, DBpass)) 
+	        {
+	            if (conn != null) 
+	            {
+	                System.out.println("Connected to the database!");
+	                Connection = true;
+	            } else {
+	                System.out.println("Failed to make connection!");
+	            }
+	
+	        } catch (SQLException e) {
+	            System.err.format("SQL State: %s\n%s", e.getSQLState(), e.getMessage());
+	            System.out.println("");
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            System.out.println("");
+	        }
+		}
+
 	}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
