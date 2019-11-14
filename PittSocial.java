@@ -464,28 +464,35 @@ public class PittSocial
 		boolean created = false;
 		String SQL = "INSERT INTO profile(userid, name, email, password, date_of_birth, lastlogin) " + "VALUES(?, ?, ?, ?, ?, ?)";
 		Timestamp ts = new Timestamp(System.currentTimeMillis());
-		Date bday = Date.valueOf(birthday); 
-		
-		int UID = getNextID();
-		try (Connection conn = connect();
-                PreparedStatement pstmt = conn.prepareStatement(SQL)) 
+		try
 		{
-			pstmt.setInt(1, UID);
-            pstmt.setString(2, username);
-            pstmt.setString(3, email);
-            pstmt.setString(4, password);
-            pstmt.setDate(5, bday);
-            pstmt.setTimestamp(6, ts);
- 
-            pstmt.executeUpdate();
-            
-            created = true;
-            return created;
+			Date bday = Date.valueOf(birthday);
+			int UID = getNextID();
+			try (Connection conn = connect();
+	                PreparedStatement pstmt = conn.prepareStatement(SQL)) 
+			{
+				pstmt.setInt(1, UID);
+	            pstmt.setString(2, username);
+	            pstmt.setString(3, email);
+	            pstmt.setString(4, password);
+	            pstmt.setDate(5, bday);
+	            pstmt.setTimestamp(6, ts);
+	 
+	            pstmt.executeUpdate();
+	            
+	            created = true;
+	            return created;
+			}
+			catch(Exception e)
+			{
+				System.out.println(e.getMessage());
+				return created;
+			}
 		}
-		catch(Exception e)
+		catch(Exception g)
 		{
-			System.out.println(e.getMessage());
-			return created;
+			System.out.println("Incorrect Date Format");
+			return false;
 		}
 	}
 	
