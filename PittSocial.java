@@ -1,4 +1,6 @@
 import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
 /** This is the PittSocial 1555 Application
@@ -18,8 +20,9 @@ public class PittSocial
 
 	/** The main class for PittSocial
 	 * @param args - Not used in this application
+	 * @throws Exception 
 	 */
-	public static void main(String[] args) 
+	public static void main(String[] args) throws Exception 
 	{
 		startup();
 		while(run)
@@ -79,8 +82,9 @@ public class PittSocial
 	 * This will log a user in with either their credentials or
 	 * with their newly created account. Upon login or creation,
 	 * the variable "login" will be set to true
+	 * @throws Exception 
 	 */
-	private static void login_or_create()
+	private static void login_or_create() throws Exception
 	{
 		System.out.println("---- Welcome to PittSocial! ----");
 		System.out.println("");
@@ -175,17 +179,27 @@ public class PittSocial
 		else if(initialize.equals("2"))
 		{
 			Scanner kbd2 = new Scanner(System.in);
-			System.out.print("Please enter a username: ");
-			String username = kbd2.nextLine();
+			System.out.print("Please enter a username [first last]: ");
+			String usernameInput = kbd2.nextLine();
 			System.out.print("Please enter a password: ");
 			String password = kbd2.nextLine();
-			System.out.print("Please enter an email: ");
+			System.out.print("Please enter an email [something@something.$$$: ");
 			String email = kbd2.nextLine();
-			System.out.print("Please enter your birthday: ");
+			System.out.print("Please enter your birthday [YYYY-MM-DD]: ");
 			String birthday = kbd2.nextLine();
 			
-			login = true;
-			System.out.println("");
+			boolean created = createUser(usernameInput, password, email, birthday);
+			if(created)
+			{
+				username = usernameInput;
+				login = true;
+				System.out.println("");
+			}
+			else 
+			{
+				System.out.println("Creation Failed");
+				login = false;
+			}
 		}
 		// Exiting the application
 		else
@@ -384,6 +398,13 @@ public class PittSocial
 /////////////////////////////////////MAIN METHODS/////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
+	/** This method will login the user given the input of the username and password
+	 * This will return a boolean of true if the user + password combo is correct
+	 * 
+	 * @param username - the first and last name of the user
+	 * @param password - the password of the user
+	 * @return boolean - true if logged in false otherwise
+	 */
 	private static boolean loginRequest(String username, String password)
 	{
 		boolean exists = false;
@@ -403,6 +424,15 @@ public class PittSocial
 		}
 	}
 	
+	/** This method is a companion to the loginRequest method
+	 * this does the actual search for the user/password
+	 * 
+	 * @param rs - the result set 
+	 * @param username - the first and last name of the user
+	 * @param password - the password of the user
+	 * @return boolean - true if found, false otherwise
+	 * @throws SQLException
+	 */
 	private static boolean lookForUser(ResultSet rs, String username, String password) throws SQLException
 	{
 		boolean exists = false;
@@ -417,6 +447,69 @@ public class PittSocial
 			}
 		}
 		return exists;
+	}
+	
+	/** This method creates a new user and inputs them into the DBMS, returning a true 
+	 * if everything completes correctly
+	 * 
+	 * @param username - the username of the new user (first last)
+	 * @param password - the password of the new user
+	 * @param email - the email of the new user
+	 * @param birthday - the birthday (NOTE OF FORM - "2015-01-01")
+	 * @return
+	 * @throws ParseException 
+	 */
+	private static boolean createUser(String username, String password, String email, String birthday) throws Exception
+	{
+		boolean created = false;
+		String SQL = "INSERT INTO profile(userid, name, email, password, date_of_birth, lastlogin) " + "VALUES(?, ?, ?, ?, ?, ?)";
+		Timestamp ts = new Timestamp(System.currentTimeMillis());
+		Date bday = Date.valueOf(birthday); 
+		
+		int UID = getNextID();
+		try (Connection conn = connect();
+                PreparedStatement pstmt = conn.prepareStatement(SQL)) 
+		{
+			pstmt.setInt(1, UID);
+            pstmt.setString(2, username);
+            pstmt.setString(3, email);
+            pstmt.setString(4, password);
+            pstmt.setDate(5, bday);
+            pstmt.setTimestamp(6, ts);
+ 
+            pstmt.executeUpdate();
+            
+            created = true;
+            return created;
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+			return created;
+		}
+	}
+	
+	/** This method gets the next userID for the primary key of creating a user
+	 * 
+	 * @return int - the next userID to use
+	 */
+	private static int getNextID() throws Exception
+	{
+		int id = 0;
+		String SQL = "SELECT count(userid) as CUID FROM profile";
+		
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			while(rs.next())
+			{
+				id = rs.getInt("CUID");
+				id++;
+				return id;
+			}
+			return id;
+		}
 	}
 	
 	/** This method will send a friend request from the current user 
