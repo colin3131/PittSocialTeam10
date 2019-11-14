@@ -12,6 +12,9 @@ public class PittSocial
 	private static boolean login;
 	private static String username;
 	private static boolean run;
+	private static String url;
+	private static String userDBMS;
+	private static String passwordDBMS;
 
 	/** The main class for PittSocial
 	 * @param args - Not used in this application
@@ -53,6 +56,9 @@ public class PittSocial
 	            {
 	                System.out.println("Connected to the database!");
 	                Connection = true;
+	                userDBMS = DBuser;
+	                passwordDBMS = DBpass;
+	                url = "jdbc:postgresql://localhost:5432/";
 	            } else {
 	                System.out.println("Failed to make connection!");
 	            }
@@ -129,10 +135,13 @@ public class PittSocial
 				System.out.print("Please enter your password: ");
 				String input2 = kbd2.nextLine();
 				
-				boolean userExists = false;
+				boolean userExists = loginRequest(input1, input2);
 				//userExists = true; // Testing phase so we can get into the server
 				if(userExists)
 				{
+					System.out.println("Login Success!");
+					System.out.println("");
+					username = input1;
 					// Check to see if the user exists
 					login = true;
 					tryLogin = false;
@@ -375,6 +384,41 @@ public class PittSocial
 /////////////////////////////////////MAIN METHODS/////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
+	private static boolean loginRequest(String username, String password)
+	{
+		boolean exists = false;
+		String SQL = "SELECT name, password FROM profile";
+		
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) {
+            // look for combo
+            exists = lookForUser(rs, username, password);
+            return exists;
+		}
+		catch(Exception e)
+		{
+			System.out.println("there was a prob");
+			return exists;
+		}
+	}
+	
+	private static boolean lookForUser(ResultSet rs, String username, String password) throws SQLException
+	{
+		boolean exists = false;
+		while(rs.next())
+		{
+			String tempName = rs.getString("name");
+			String tempPass = rs.getString("password");
+			if(username.equals(tempName) && password.equals(tempPass))
+			{
+				exists = true;
+				return exists;
+			}
+		}
+		return exists;
+	}
+	
 	/** This method will send a friend request from the current user 
 	 * to a user of their choice
 	 */
@@ -499,5 +543,14 @@ public class PittSocial
 		run = false;
 		System.out.println("Thanks for using PittSocial!");
 	}
-
+	
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////Methods to Call in user_application//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////DBMS METHODS/////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	public static Connection connect() throws SQLException 
+	{
+        return DriverManager.getConnection(url, userDBMS, passwordDBMS);
+    }
 }
