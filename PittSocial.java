@@ -31,7 +31,7 @@ public class PittSocial
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	/** This methods sets up the PittSocial program for use.
-	 * It sets login to false and prints the welcome message.
+	 * It sets login to false, connects to the DBMS, and prints the welcome message.
 	 */
 	private static void startup()
 	{
@@ -65,7 +65,6 @@ public class PittSocial
 	            System.out.println("");
 	        }
 		}
-
 	}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
