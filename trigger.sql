@@ -295,8 +295,40 @@ CREATE TRIGGER user_remove_from_groups
 -- TRIGGER 12: [TODO]
 -- When a User is deleted, delete all messages where the from and to users are deleted.
 -- ASSUMPTION: If neither user is on the system anymore, no one can view the messages, so they should be removed.
+CREATE OR REPLACE FUNCTION removeUserFromMessages()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    DELETE FROM messageInfo mi
+    WHERE NEW.userID=mi.fromID or NEW.userID=mi.toUserID;
+    RETURN NEW;
+END;
+$$ LANGUAGE 'plpgsql';
+
+DROP TRIGGER IF EXISTS user_remove_from_messages on profile;
+CREATE TRIGGER user_remove_from_messages
+    BEFORE DELETE
+    ON profile
+    FOR EACH ROW
+    EXECUTE PROCEDURE removeUserFromMessages();
 
 
 -- TRIGGER 13: [TODO]
 -- When a User is deleted, delete their entries in the messageRecipient table.
 -- ASSUMPTION: If a user isn't on the system anymore, they can't view their messages
+CREATE OR REPLACE FUNCTION removeUserFromMessageRecipient()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    DELETE FROM messageInfo mi
+    WHERE NEW.userID=mi.fromID or NEW.userID=mi.toUserID;
+    RETURN NEW;
+END;
+$$ LANGUAGE 'plpgsql';
+
+DROP TRIGGER IF EXISTS user_remove_from_message_recipient on profile;
+CREATE TRIGGER user_remove_from_message_recipient
+    BEFORE DELETE
+    ON profile
+    FOR EACH ROW
+    EXECUTE PROCEDURE removeUserFromMessageRecipient();
