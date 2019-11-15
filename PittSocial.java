@@ -17,6 +17,7 @@ public class PittSocial
 	private static String url;
 	private static String userDBMS;
 	private static String passwordDBMS;
+	private static int userID;
 
 	/** The main class for PittSocial
 	 * @param args - Not used in this application
@@ -275,6 +276,8 @@ public class PittSocial
 		System.out.println("1: Create a Group");
 		System.out.println("2: Join a Group");
 		System.out.println("3: Back to Main Menu");
+		System.out.println("");
+		System.out.print("--> ");
 		
 		Scanner kbd = new Scanner(System.in);
 		String input = kbd.nextLine();
@@ -301,6 +304,8 @@ public class PittSocial
 		System.out.println("4: Search For User");
 		System.out.println("5: Three Degress Command");
 		System.out.println("6: Back to Main Menu");
+		System.out.println("");
+		System.out.print("--> ");
 		
 		Scanner kbd = new Scanner(System.in);
 		String input = kbd.nextLine();
@@ -339,6 +344,8 @@ public class PittSocial
 		System.out.println("4: Display New Messages");
 		System.out.println("5: Display Top Messages");
 		System.out.println("6: Back to Main Menu");
+		System.out.println("");
+		System.out.print("--> ");
 		
 		Scanner kbd = new Scanner(System.in);
 		String input = kbd.nextLine();
@@ -374,6 +381,8 @@ public class PittSocial
 		System.out.println("1: Logout");
 		System.out.println("2: Delete Account");
 		System.out.println("3: Back to Main Menu");
+		System.out.println("");
+		System.out.print("--> ");
 		
 		Scanner kbd = new Scanner(System.in);
 		String input = kbd.nextLine();
@@ -408,7 +417,7 @@ public class PittSocial
 	private static boolean loginRequest(String username, String password)
 	{
 		boolean exists = false;
-		String SQL = "SELECT name, password FROM profile";
+		String SQL = "SELECT userid, name, password FROM profile";
 		
 		try (Connection conn = connect();
                 Statement stmt = conn.createStatement();
@@ -438,10 +447,12 @@ public class PittSocial
 		boolean exists = false;
 		while(rs.next())
 		{
+			int tempID = rs.getInt("userid");
 			String tempName = rs.getString("name");
 			String tempPass = rs.getString("password");
 			if(username.equals(tempName) && password.equals(tempPass))
 			{
+				userID = tempID;
 				exists = true;
 				return exists;
 			}
@@ -479,6 +490,8 @@ public class PittSocial
 	            pstmt.setTimestamp(6, ts);
 	 
 	            pstmt.executeUpdate();
+	            
+	            userID = UID;
 	            
 	            created = true;
 	            return created;
@@ -585,6 +598,7 @@ public class PittSocial
             pstmt.setString(4, description);
  
             pstmt.executeUpdate();
+            addGroupCreator(userID, GID);
             
             success = true;
             return success;
@@ -616,6 +630,25 @@ public class PittSocial
 				return id;
 			}
 			return id;
+		}
+	}
+	
+	private static void addGroupCreator(int UID, int groupID)
+	{
+		String SQL = "INSERT INTO groupmember(gid, userid, role) " + "VALUES(?, ?, ?)";
+		
+		try (Connection conn = connect();
+                PreparedStatement pstmt = conn.prepareStatement(SQL)) 
+		{
+			pstmt.setInt(1, groupID);
+            pstmt.setInt(2, UID);
+            pstmt.setString(3, "manager");
+ 
+            pstmt.executeUpdate();
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
 		}
 	}
 	
