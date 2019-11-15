@@ -516,7 +516,7 @@ public class PittSocial
 	private static int getNextID() throws Exception
 	{
 		int id = 0;
-		String SQL = "SELECT count(userid) as CUID FROM profile";
+		String SQL = "SELECT userid FROM profile ORDER BY userid DESC";
 		
 		try (Connection conn = connect();
                 Statement stmt = conn.createStatement();
@@ -524,7 +524,7 @@ public class PittSocial
 		{
 			while(rs.next())
 			{
-				id = rs.getInt("CUID");
+				id = rs.getInt("userid");
 				id++;
 				return id;
 			}
@@ -668,7 +668,7 @@ public class PittSocial
 	private static int getNextGID() throws Exception
 	{
 		int id = 0;
-		String SQL = "SELECT count(gid) as CGID FROM groupinfo";
+		String SQL = "SELECT gid FROM groupinfo ORDER BY gid DESC";
 		
 		try (Connection conn = connect();
                 Statement stmt = conn.createStatement();
@@ -676,7 +676,7 @@ public class PittSocial
 		{
 			while(rs.next())
 			{
-				id = rs.getInt("CGID");
+				id = rs.getInt("gid");
 				id++;
 				return id;
 			}
