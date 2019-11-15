@@ -96,7 +96,7 @@ BEGIN
         WHERE new.fromID = pf.toID
           AND new.toID = pf.fromID
     ) THEN
-        INSERT INTO friend("userID1", "userID2", "JDate", "message")
+        INSERT INTO friend("userid1", "userid2", "jdate", "message")
             VALUES(new.fromID, new.toID, CURRENT_DATE, new.message);
         DELETE FROM pendingFriend p
             WHERE pf.fromID=p.toID
@@ -300,3 +300,7 @@ CREATE TRIGGER user_remove_from_groups
 -- TRIGGER 13: [TODO]
 -- When a User is deleted, delete their entries in the messageRecipient table.
 -- ASSUMPTION: If a user isn't on the system anymore, they can't view their messages
+
+-- TRIGGER 14: [TODO]
+-- When a User sends a friend request to themself, deny it.
+-- ASSUMPTION: A user can't be friends with themselves.
