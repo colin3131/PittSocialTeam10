@@ -17,6 +17,7 @@ public class PittSocial
 	private static String url;
 	private static String userDBMS;
 	private static String passwordDBMS;
+	private static int userID;
 
 	/** The main class for PittSocial
 	 * @param args - Not used in this application
@@ -408,7 +409,7 @@ public class PittSocial
 	private static boolean loginRequest(String username, String password)
 	{
 		boolean exists = false;
-		String SQL = "SELECT name, password FROM profile";
+		String SQL = "SELECT userid, name, password FROM profile";
 		
 		try (Connection conn = connect();
                 Statement stmt = conn.createStatement();
@@ -438,10 +439,12 @@ public class PittSocial
 		boolean exists = false;
 		while(rs.next())
 		{
+			int tempID = rs.getInt("userid");
 			String tempName = rs.getString("name");
 			String tempPass = rs.getString("password");
 			if(username.equals(tempName) && password.equals(tempPass))
 			{
+				userID = tempID;
 				exists = true;
 				return exists;
 			}
@@ -478,7 +481,9 @@ public class PittSocial
 	            pstmt.setDate(5, bday);
 	            pstmt.setTimestamp(6, ts);
 	 
-	            pstmt.executeUpdate();
+				pstmt.executeUpdate();
+				
+				userID = UID;
 	            
 	            created = true;
 	            return created;
@@ -524,7 +529,58 @@ public class PittSocial
 	 */
 	private static void initiateFriendship()
 	{
-		
+		Scanner sc = new Scanner(System.in);
+
+		// notValid: Keep the loop running while the input is invalid
+		// requestNotSent: Keep the loop running while no request was sent
+		boolean requestNotSent = true;
+		while(requestNotSent){
+			System.out.print("Please enter the User ID to request: ");
+			if(sc.hasNextInt()){
+				int toUserID = sc.nextInt();
+				sc.nextLine(); //Gotta consume the rest of this line
+				System.out.print("\nPlease enter a message to send with the request\n>");
+				String message = sc.nextLine();
+
+				System.out.println();
+				System.out.print("Are you sure you'd like to add user "+toUserID+"?\n(y/n): ");
+				if(sc.nextLine().equalsIgnoreCase("y")){
+
+					//We have all the vars, construct our insert
+					try{
+						String SQL = "INSERT INTO pendingFriend VALUES(?, ?, ?)";
+						Connection conn = connect();
+						PreparedStatement pstmt = conn.prepareStatement(SQL);
+						pstmt.setInt(1, userID);
+						pstmt.setInt(2, toUserID);
+						pstmt.setString(3, message);
+						pstmt.executeUpdate();
+
+						// If we get here, request was sent.
+						requestNotSent = false;
+					}
+					catch(Exception e){
+						System.out.println(e.getMessage());
+						break;
+					}
+				}
+				else{
+					break;
+				}
+			}
+			else{ // If the input isn't an integer, make 'em retry
+				System.out.println("\nPlease enter a valid User ID.\n");
+			}
+		}
+
+		// Check if the request was actually sent, print success/failure
+		if(requestNotSent){
+			System.out.println("Friend Request was not sent.\n");
+		}
+		else{
+			System.out.println("Friend Request sent successfully.\n");
+		}
+		//sc.close();
 	}
 	
 	/** This method will create a group, and make the creator the first
