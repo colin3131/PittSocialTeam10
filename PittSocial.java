@@ -532,7 +532,91 @@ public class PittSocial
 	 */
 	private static void createGroup()
 	{
+		Scanner CGkbd = new Scanner(System.in);
+		System.out.print("Please enter a name for your group: ");
+		String groupName = CGkbd.nextLine();
+		System.out.print("Please enter a limit for the group [max # of people]: ");
+		String limitString = CGkbd.nextLine();
+		int limit = 100;
+		try
+		{
+			limit = Integer.parseInt(limitString);
+		}
+		catch(Exception l)
+		{
+			System.out.println("Invalid number... Defaulting to size of 100");
+			limit = 100;
+		}
+		System.out.print("Please enter a description of the group: ");
+		String description = CGkbd.nextLine();
 		
+		boolean createdGroup = createGroupSub(groupName, limit, description);
+		
+		if(createdGroup)
+		{
+			System.out.println("Group Successfully Created!");
+		}
+		else
+		{
+			System.out.println("Group Failed to be Created");
+		}
+	}
+	
+	/** This method will be called in createGroup to run the SQL command
+	 * to actually insert the group being created.
+	 * 
+	 * @param groupName - the name of the group
+	 * @param limit - the limit of members allowed
+	 * @param description - description of the group
+	 * @return boolean - true if created, false otherwise
+	 */
+	private static boolean createGroupSub(String groupName, int limit, String description)
+	{
+		boolean success = false;
+		String SQL = "INSERT INTO groupinfo(gid, name, size, description) " + "VALUES(?, ?, ?, ?)";
+		
+		try (Connection conn = connect();
+                PreparedStatement pstmt = conn.prepareStatement(SQL)) 
+		{
+			int GID = getNextGID();
+			pstmt.setInt(1, GID);
+            pstmt.setString(2, groupName);
+            pstmt.setInt(3, limit);
+            pstmt.setString(4, description);
+ 
+            pstmt.executeUpdate();
+            
+            success = true;
+            return success;
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+			return success;
+		}
+	}
+	
+	/** This method gets the next GroupID for the primary key of creating a Group
+	 * 
+	 * @return int - the next userID to use
+	 */
+	private static int getNextGID() throws Exception
+	{
+		int id = 0;
+		String SQL = "SELECT count(gid) as CGID FROM groupinfo";
+		
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			while(rs.next())
+			{
+				id = rs.getInt("CGID");
+				id++;
+				return id;
+			}
+			return id;
+		}
 	}
 	
 	/** This method will send a pendingGroupRequest from the current user
