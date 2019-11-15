@@ -493,8 +493,6 @@ public class PittSocial
 				
 				userID = UID;
 	            
-	            userID = UID;
-	            
 	            created = true;
 	            return created;
 			}
