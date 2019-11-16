@@ -1,7 +1,11 @@
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Scanner;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ArrayList;
 
 /** This is the PittSocial 1555 Application
  * 
@@ -549,31 +553,38 @@ public class PittSocial
 				sc.nextLine(); //Gotta consume the rest of this line
 				System.out.print("\nPlease enter a message to send with the request\n>");
 				String message = sc.nextLine();
-
 				System.out.println();
-				System.out.print("Are you sure you'd like to add user "+toUserID+"?\n(y/n): ");
-				if(sc.nextLine().equalsIgnoreCase("y")){
 
-					//We have all the vars, construct our insert
-					try{
-						String SQL = "INSERT INTO pendingFriend VALUES(?, ?, ?)";
-						Connection conn = connect();
-						PreparedStatement pstmt = conn.prepareStatement(SQL);
-						pstmt.setInt(1, userID);
-						pstmt.setInt(2, toUserID);
-						pstmt.setString(3, message);
-						pstmt.executeUpdate();
+				// Pull all of the user's info
+				try{
+					Map user = getUserInfo(toUserID);
+					System.out.print("Are you sure you'd like to add "+user.get("name")+"?\n(y/n): ");
+					if(sc.nextLine().equalsIgnoreCase("y")){
 
-						// If we get here, request was sent.
-						requestNotSent = false;
+						//We have all the vars, construct our insert
+						try{
+							String SQL = "INSERT INTO pendingFriend VALUES(?, ?, ?)";
+							Connection conn = connect();
+							PreparedStatement pstmt = conn.prepareStatement(SQL);
+							pstmt.setInt(1, userID);
+							pstmt.setInt(2, toUserID);
+							pstmt.setString(3, message);
+							pstmt.executeUpdate();
+
+							// If we get here, request was sent.
+							requestNotSent = false;
+						}
+						catch(Exception e){
+							System.out.println(e.getMessage());
+							break;
+						}
 					}
-					catch(Exception e){
-						System.out.println(e.getMessage());
+					else{
 						break;
 					}
-				}
-				else{
-					break;
+				} catch(Exception e){
+					System.out.println(e.getMessage());
+					System.out.println("\nPlease enter a valid User ID.\n");
 				}
 			}
 			else{ // If the input isn't an integer, make 'em retry
@@ -590,7 +601,57 @@ public class PittSocial
 		}
 		//sc.close();
 	}
-	
+
+	/** This method will pull all of the user info given a User ID
+	 * @param UID - The user ID of the User to grab
+	 * @return HashMap - returns a bunch of key-value pairs of user info
+	 */
+	private static Map<String, Object> getUserInfo(int UID) throws Exception
+	{
+		Map user = new HashMap<String, Object>();
+		String SQL = "SELECT * FROM profile WHERE userid=" + UID + "";
+
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			while(rs.next())
+			{
+				user.put("userid", rs.getInt("userid"));
+				user.put("name", rs.getString("name"));
+				user.put("email", rs.getString("email"));
+				user.put("date_of_birth", rs.getDate("date_of_birth"));
+				user.put("lastlogin", rs.getTimestamp("lastlogin"));
+			}
+			return user;
+		}
+	}
+
+	/** This method will pull all of the group info given a Group ID
+	 * @param UID - The group ID of the Group to grab
+	 * @return HashMap - returns a bunch of key-value pairs of group info
+	 */
+	private static Map<String, Object> getGroupInfo(int GID) throws Exception
+	{
+		Map group = new HashMap<String, Object>();
+		String SQL = "SELECT * FROM groupInfo WHERE gid=" + GID + "";
+
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			while(rs.next())
+			{
+				group.put("gid", rs.getInt("gid"));
+				group.put("name", rs.getString("name"));
+				group.put("size", rs.getInt("size"));
+				group.put("description", rs.getString("description"));
+			}
+			return group;
+		}
+	}
+
+
 	/** This method will create a group, and make the creator the first
 	 * member of that group
 	 */
@@ -716,7 +777,196 @@ public class PittSocial
 	 */
 	private static void confirmRequests()
 	{
-		
+		boolean chooseMore = true;
+		try{
+			while(chooseMore){
+				// Find all the requests.
+				ArrayList<HashMap> groupReqs = getGroupRequests(userID);
+				ArrayList<HashMap> friendReqs = getFriendRequests(userID);
+				int groupSize = groupReqs.size();
+				int friendSize = friendReqs.size();
+
+				System.out.println("\nOutstanding Friend and Group Requests");
+				System.out.println(" 0. Deny all requests and return to main.");
+				for(int i = 0; i < (groupSize + friendSize); i++){
+					if(i < groupSize){
+						// Get the request details to print
+						HashMap<String, Object> grouprequest = groupReqs.get(i);
+						String reqmessage = grouprequest.get("message").toString();
+						Map<String, Object> reqgroup = getGroupInfo((int)grouprequest.get("gid"));
+						String reqgn = reqgroup.get("name").toString();
+						Map<String, Object> requser = getUserInfo((int)grouprequest.get("userid"));
+						String requn = requser.get("name").toString();
+
+						// Print the request
+						System.out.println((i+1) + ". " + requn + " is requesting to join " + reqgn + ": " + reqmessage);
+					}
+					else{
+						// Get the request details to print
+						HashMap<String, Object> userrequest = friendReqs.get(i - groupSize);
+						String reqmessage = userrequest.get("message").toString();
+						Map<String, Object> requser = getUserInfo((int)userrequest.get("fromid"));
+						String requn = requser.get("name").toString();
+						System.out.println((i+1) + ". " + requn + " wants to be your friend: " + reqmessage);
+					}
+				}
+				
+				// Allow user to choose an option
+				Scanner sc = new Scanner(System.in);
+				System.out.print("\nChoose a request to accept: ");
+				if(sc.hasNextInt()){
+					// Grab the choice
+					int choice = sc.nextInt();
+					sc.nextLine();
+
+					if(choice == 0){ // Deny all requests
+						//[TODO] Delete all requests method
+						chooseMore = false;
+					}else if(choice <= groupSize){ // Accept a group join request
+						choice--;
+						HashMap<String, Object> grouprequest = groupReqs.get(choice);
+						int gID = (int)grouprequest.get("gid");
+						int userID = (int)grouprequest.get("userid");
+						boolean successful = confirmGroupMember(gID, userID);
+						if(successful){
+							System.out.println("\nSuccessfully added user to group.\n");
+						}else{
+							System.out.println("\nAccepting group join request failed.\n");
+						}
+					}else if(choice <= (groupSize + friendSize)){
+						choice -= (groupSize + 1);
+						HashMap<String, Object> userrequest = friendReqs.get(choice);
+						int toID = userID;
+						int fromID = (int)userrequest.get("fromid");
+						String message = userrequest.get("message").toString();
+						boolean successful = confirmFriend(toID, fromID, message);
+						if(successful){
+							System.out.println("\nSuccessfully added friend.\n");
+						}else{
+							System.out.println("\nAccepting friend request failed.\n");
+						}
+					}
+				}
+			}
+		} catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+	}
+
+	/** This method will confirm a friend request, adding the two friends and 
+	 * deleting the pendingFriend entry
+	 * @param toID - The recipient of the friend request
+	 * @param fromID - The sender of the friend request
+	 * @param message - The message of the friend request
+	 * @return boolean - Return success or failure
+	 */
+	private static boolean confirmFriend(int toID, int fromID, String message)
+	{
+		String SQL = "INSERT INTO friend(userid1, userid2, jdate, message) " + "VALUES(?, ?, ?, ?)";
+		Timestamp ts = new Timestamp(System.currentTimeMillis());
+		try{
+			Connection conn = connect();
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			pstmt.setInt(1, toID);
+			pstmt.setInt(2, fromID);
+			pstmt.setDate(3, Date.valueOf(LocalDate.now()));
+			pstmt.setString(4, message);
+			pstmt.executeUpdate();
+			return true;
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+			return false;
+		}
+	}
+
+	/** This method will confirm a group member request, adding the member and 
+	 * deleting the pendingGroupMember entry
+	 * @param gID - The group that the user is joining
+	 * @param userID - The user that is joining
+	 * @return boolean - Return success or failure
+	 */
+	private static boolean confirmGroupMember(int gID, int userID)
+	{
+		String SQL = "INSERT INTO groupmember(gid, userid, role) " + "VALUES(?, ?, ?)";
+		try{
+			Connection conn = connect();
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			pstmt.setInt(1, gID);
+			pstmt.setInt(2, userID);
+			pstmt.setString(3, "member");
+			pstmt.executeUpdate();
+			return true;
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+			return false;
+		}
+	}
+
+	/**
+	 * 
+	 * @param UID - The user who's requests we are querying for
+	 * @return ArrayList - A list of friend and group requests
+	 */
+	private static ArrayList<HashMap> getGroupRequests(int UID) throws Exception
+	{
+		ArrayList<HashMap> grouprequests = new ArrayList<HashMap>();
+		for(int gid : getManagerGroups(UID)){
+			String SQL = "SELECT userid, message FROM pendinggroupmember WHERE gid=" + gid + "";
+			try(
+				Connection conn = connect();
+				Statement stmt = conn.createStatement();
+				ResultSet rs = stmt.executeQuery(SQL)
+			){
+				while(rs.next()){
+					HashMap request = new HashMap<String, Object>();
+					request.put("gid", gid);
+					request.put("userid", rs.getInt("userid"));
+					request.put("message", rs.getString("message"));
+					grouprequests.add(request);
+				}
+			}
+		}
+		return grouprequests;
+	}
+
+	private static ArrayList<HashMap> getFriendRequests(int UID) throws Exception
+	{
+		ArrayList<HashMap> friendrequests = new ArrayList<HashMap>();
+		String SQL = "SELECT fromid, message FROM pendingfriend WHERE toid=" + UID + "";
+		try(
+			Connection conn = connect();
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(SQL)
+		){
+			while(rs.next()){
+				HashMap request = new HashMap<String, Object>();
+				request.put("fromid", rs.getInt("fromid"));
+				request.put("message", rs.getString("message"));
+				friendrequests.add(request);
+			}
+		}
+		return friendrequests;
+	}
+
+	/** This method looks for groups that the given user is the Manager of.
+	 * 
+	 * @param userID - The user who created the groups
+	 * @return ArrayList - A list of Group ID's where userID is the creator
+	 */
+	private static ArrayList<Integer> getManagerGroups(int UID) throws Exception
+	{
+		String SQL = "SELECT gid FROM groupmember WHERE userid=" + UID + " AND role='manager'";
+		ArrayList<Integer> groups = new ArrayList<Integer>();
+		try(
+			Connection conn = connect();
+        	Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(SQL)
+		){
+			while(rs.next()){
+				groups.add(rs.getInt("gid"));
+			}
+			return groups;
+		}
 	}
 	
 	/** This method will send a message to a user from the current user
