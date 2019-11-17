@@ -8,8 +8,8 @@ CREATE OR REPLACE FUNCTION pendingFriend_check()
 $$
 BEGIN
     IF EXISTS (SELECT FROM pendingFriend p
-                WHERE new.userID1=p.fromID
-                    AND new.userID2=p.toID) THEN
+                WHERE new.userID1=p.toID
+                    AND new.userID2=p.fromID) THEN
 
         DELETE FROM pendingFriend p
             WHERE new.userID1=p.toID

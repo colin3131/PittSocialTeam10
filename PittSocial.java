@@ -820,7 +820,7 @@ public class PittSocial
 					sc.nextLine();
 
 					if(choice == 0){ // Deny all requests
-						//[TODO] Delete all requests method
+						denyAllRequests(userID);
 						chooseMore = false;
 					}else if(choice <= groupSize){ // Accept a group join request
 						choice--;
@@ -879,20 +879,43 @@ public class PittSocial
 		}
 	}
 
+	/** This method will deny a friend request, deleting it from the db
+	 * 
+	 * @param toID - the toID of the request
+	 * @param fromID - the fromID of the request
+	 * @return boolean - Return success or failure
+	 */
+	private static boolean denyFriend(int toID, int fromID)
+	{
+		String SQL = "DELETE FROM pendingfriend WHERE fromid=? AND toid=?";
+		try{
+			Connection conn = connect();
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			pstmt.setInt(1, fromID);
+			pstmt.setInt(2, toID);
+			pstmt.executeUpdate();
+			return true;
+		}
+		catch(Exception e){
+			System.out.println(e.getMessage());
+			return false;
+		}
+	}
+
 	/** This method will confirm a group member request, adding the member and 
 	 * deleting the pendingGroupMember entry
 	 * @param gID - The group that the user is joining
 	 * @param userID - The user that is joining
 	 * @return boolean - Return success or failure
 	 */
-	private static boolean confirmGroupMember(int gID, int userID)
+	private static boolean confirmGroupMember(int gID, int uid)
 	{
 		String SQL = "INSERT INTO groupmember(gid, userid, role) " + "VALUES(?, ?, ?)";
 		try{
 			Connection conn = connect();
 			PreparedStatement pstmt = conn.prepareStatement(SQL);
 			pstmt.setInt(1, gID);
-			pstmt.setInt(2, userID);
+			pstmt.setInt(2, uid);
 			pstmt.setString(3, "member");
 			pstmt.executeUpdate();
 			return true;
@@ -902,10 +925,68 @@ public class PittSocial
 		}
 	}
 
+	/** This method will deny a group member request, removing it from the db 
+	 * 
+	 * @param gID - The group that the user is trying to join
+	 * @param userID - The user that is trying to join
+	 * @return boolean - Return success or failure
+	 */
+	private static boolean denyGroupMember(int gID, int uid)
+	{
+		String SQL = "DELETE FROM pendinggroupmember WHERE gid=? AND userid=?";
+		try{
+			Connection conn = connect();
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			pstmt.setInt(1, gID);
+			pstmt.setInt(2, uid);
+			pstmt.executeUpdate();
+			return true;
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+			return false;
+		}
+	}
+
+	private static void denyAllRequests(int UID)
+	{
+		// First, get and delete all friend requests
+		try{
+			for(HashMap<String, Object> friendreq : getFriendRequests(UID)){
+				int fromID = (int)friendreq.get("fromid");
+				boolean success = denyFriend(UID, fromID);
+				if(success){
+					System.out.println("Successfully denied friend request from " + getUserInfo(fromID).get("name").toString());
+				}else{
+					System.out.println("Failed to deny friend request from " + getUserInfo(fromID).get("name").toString());
+				}
+			}
+		}
+		catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+
+		// Then, get and delete all group join requests
+		try{
+			for(HashMap<String, Object> groupreq : getGroupRequests(UID)){
+				int gid = (int)groupreq.get("gid");
+				int uid = (int)groupreq.get("userid");
+				boolean success = denyGroupMember(gid, uid);
+				if(success){
+					System.out.println("Successfully denied group join request from " + getUserInfo(uid).get("name").toString());
+				}else{
+					System.out.println("Failed to denied group join request from " + getUserInfo(uid).get("name").toString());
+				}
+			}
+		}
+		catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+	}
+
 	/**
 	 * 
 	 * @param UID - The user who's requests we are querying for
-	 * @return ArrayList - A list of friend and group requests
+	 * @return ArrayList - A list of group requests (gid, userid, message)
 	 */
 	private static ArrayList<HashMap> getGroupRequests(int UID) throws Exception
 	{
@@ -929,6 +1010,11 @@ public class PittSocial
 		return grouprequests;
 	}
 
+	/**
+	 * 
+	 * @param UID - The user who's requests we are querying for
+	 * @return ArrayList - A list of group requests (fromid, message)
+	 */
 	private static ArrayList<HashMap> getFriendRequests(int UID) throws Exception
 	{
 		ArrayList<HashMap> friendrequests = new ArrayList<HashMap>();

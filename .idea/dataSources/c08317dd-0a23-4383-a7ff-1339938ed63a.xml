@@ -12,7 +12,7 @@
       <ObjectId>13012</ObjectId>
       <Comment>default administrative connection database</Comment>
       <Owner>postgres</Owner>
-      <IntrospectionStateNumber>5059</IntrospectionStateNumber>
+      <IntrospectionStateNumber>5103</IntrospectionStateNumber>
       <Current>1</Current>
     </database>
     <role id="4" parent="1" name="TTKAuth">
@@ -91,7 +91,7 @@
       <Comment>standard public schema</Comment>
       <StateNumber>360</StateNumber>
       <Owner>postgres</Owner>
-      <IntrospectionStateNumber>5060</IntrospectionStateNumber>
+      <IntrospectionStateNumber>5104</IntrospectionStateNumber>
       <Current>1</Current>
     </schema>
     <access-method id="17" parent="3" name="btree">
@@ -211,7 +211,7 @@
       <ObjectId>28187</ObjectId>
       <Owner>postgres</Owner>
       <SourceTextLength>483</SourceTextLength>
-      <StateNumber>5054</StateNumber>
+      <StateNumber>5097</StateNumber>
       <VolatilityKind>volatile</VolatilityKind>
       <ResultsDefinition>trigger</ResultsDefinition>
       <LanguageName>plpgsql</LanguageName>
@@ -222,7 +222,7 @@
       <ObjectId>19859</ObjectId>
       <Owner>postgres</Owner>
       <SourceTextLength>102</SourceTextLength>
-      <StateNumber>5039</StateNumber>
+      <StateNumber>5082</StateNumber>
       <VolatilityKind>volatile</VolatilityKind>
       <ResultsDefinition>trigger</ResultsDefinition>
       <LanguageName>plpgsql</LanguageName>
@@ -233,7 +233,7 @@
       <ObjectId>19861</ObjectId>
       <Owner>postgres</Owner>
       <SourceTextLength>249</SourceTextLength>
-      <StateNumber>5042</StateNumber>
+      <StateNumber>5085</StateNumber>
       <VolatilityKind>volatile</VolatilityKind>
       <ResultsDefinition>trigger</ResultsDefinition>
       <LanguageName>plpgsql</LanguageName>
@@ -254,7 +254,7 @@
       <ObjectId>19855</ObjectId>
       <Owner>postgres</Owner>
       <SourceTextLength>343</SourceTextLength>
-      <StateNumber>5033</StateNumber>
+      <StateNumber>5076</StateNumber>
       <VolatilityKind>volatile</VolatilityKind>
       <ResultsDefinition>trigger</ResultsDefinition>
       <LanguageName>plpgsql</LanguageName>
@@ -265,7 +265,7 @@
       <ObjectId>19853</ObjectId>
       <Owner>postgres</Owner>
       <SourceTextLength>259</SourceTextLength>
-      <StateNumber>5030</StateNumber>
+      <StateNumber>5073</StateNumber>
       <VolatilityKind>volatile</VolatilityKind>
       <ResultsDefinition>trigger</ResultsDefinition>
       <LanguageName>plpgsql</LanguageName>
@@ -321,7 +321,7 @@
       <ObjectId>19867</ObjectId>
       <Owner>postgres</Owner>
       <SourceTextLength>427</SourceTextLength>
-      <StateNumber>5051</StateNumber>
+      <StateNumber>5094</StateNumber>
       <VolatilityKind>volatile</VolatilityKind>
       <ResultsDefinition>trigger</ResultsDefinition>
       <LanguageName>plpgsql</LanguageName>
@@ -342,7 +342,7 @@
       <ObjectId>19857</ObjectId>
       <Owner>postgres</Owner>
       <SourceTextLength>450</SourceTextLength>
-      <StateNumber>5036</StateNumber>
+      <StateNumber>5079</StateNumber>
       <VolatilityKind>volatile</VolatilityKind>
       <ResultsDefinition>trigger</ResultsDefinition>
       <LanguageName>plpgsql</LanguageName>
@@ -353,7 +353,7 @@
       <ObjectId>19865</ObjectId>
       <Owner>postgres</Owner>
       <SourceTextLength>280</SourceTextLength>
-      <StateNumber>5048</StateNumber>
+      <StateNumber>5091</StateNumber>
       <VolatilityKind>volatile</VolatilityKind>
       <ResultsDefinition>trigger</ResultsDefinition>
       <LanguageName>plpgsql</LanguageName>
@@ -364,7 +364,7 @@
       <ObjectId>19851</ObjectId>
       <Owner>postgres</Owner>
       <SourceTextLength>542</SourceTextLength>
-      <StateNumber>5027</StateNumber>
+      <StateNumber>5070</StateNumber>
       <VolatilityKind>volatile</VolatilityKind>
       <ResultsDefinition>trigger</ResultsDefinition>
       <LanguageName>plpgsql</LanguageName>
@@ -375,7 +375,7 @@
       <ObjectId>19863</ObjectId>
       <Owner>postgres</Owner>
       <SourceTextLength>294</SourceTextLength>
-      <StateNumber>5045</StateNumber>
+      <StateNumber>5088</StateNumber>
       <VolatilityKind>volatile</VolatilityKind>
       <ResultsDefinition>trigger</ResultsDefinition>
       <LanguageName>plpgsql</LanguageName>
@@ -397,7 +397,7 @@
       <ObjectId>28189</ObjectId>
       <Owner>postgres</Owner>
       <SourceTextLength>91</SourceTextLength>
-      <StateNumber>5056</StateNumber>
+      <StateNumber>5100</StateNumber>
       <VolatilityKind>volatile</VolatilityKind>
       <ResultsDefinition>trigger</ResultsDefinition>
       <LanguageName>plpgsql</LanguageName>
@@ -480,16 +480,16 @@ userid2</ColNames>
       <Predicate>jdate &lt;= CURRENT_DATE</Predicate>
     </check>
     <trigger id="62" parent="26" name="friend_already_friends">
-      <ObjectId>28202</ObjectId>
-      <StateNumber>5032</StateNumber>
+      <ObjectId>28213</ObjectId>
+      <StateNumber>5075</StateNumber>
       <Turn>before-row</Turn>
       <Events>I</Events>
       <FireMode>origin</FireMode>
       <CallRoutineId>19853</CallRoutineId>
     </trigger>
     <trigger id="63" parent="26" name="friend_delete_pendingfriend">
-      <ObjectId>28201</ObjectId>
-      <StateNumber>5029</StateNumber>
+      <ObjectId>28212</ObjectId>
+      <StateNumber>5072</StateNumber>
       <Turn>after-row</Turn>
       <Events>I</Events>
       <FireMode>origin</FireMode>
@@ -613,16 +613,16 @@ userid</ColNames>
       <Predicate>((role)::text = &apos;manager&apos;::text) OR ((role)::text = &apos;member&apos;::text)</Predicate>
     </check>
     <trigger id="80" parent="28" name="groupmember_limit_check">
-      <ObjectId>28209</ObjectId>
-      <StateNumber>5053</StateNumber>
+      <ObjectId>28220</ObjectId>
+      <StateNumber>5096</StateNumber>
       <Turn>before-row</Turn>
       <Events>I</Events>
       <FireMode>origin</FireMode>
       <CallRoutineId>19867</CallRoutineId>
     </trigger>
     <trigger id="81" parent="28" name="groupmember_delete_pending">
-      <ObjectId>28207</ObjectId>
-      <StateNumber>5047</StateNumber>
+      <ObjectId>28218</ObjectId>
+      <StateNumber>5090</StateNumber>
       <Turn>after-row</Turn>
       <Events>I</Events>
       <FireMode>origin</FireMode>
@@ -719,24 +719,24 @@ userid</ColNames>
       <Predicate>timesent &lt;= CURRENT_TIMESTAMP</Predicate>
     </check>
     <trigger id="94" parent="29" name="message_check_null_id">
-      <ObjectId>28208</ObjectId>
-      <StateNumber>5050</StateNumber>
+      <ObjectId>28219</ObjectId>
+      <StateNumber>5093</StateNumber>
       <Turn>before-row</Turn>
       <Events>I</Events>
       <FireMode>origin</FireMode>
       <CallRoutineId>19865</CallRoutineId>
     </trigger>
     <trigger id="95" parent="29" name="message_addgroup_recipient">
-      <ObjectId>28210</ObjectId>
-      <StateNumber>5055</StateNumber>
+      <ObjectId>28221</ObjectId>
+      <StateNumber>5099</StateNumber>
       <Turn>after-row</Turn>
       <Events>I</Events>
       <FireMode>origin</FireMode>
       <CallRoutineId>19859</CallRoutineId>
     </trigger>
     <trigger id="96" parent="29" name="message_addrecipient_user">
-      <ObjectId>28205</ObjectId>
-      <StateNumber>5041</StateNumber>
+      <ObjectId>28216</ObjectId>
+      <StateNumber>5084</StateNumber>
       <Turn>after-row</Turn>
       <Events>I</Events>
       <FireMode>origin</FireMode>
@@ -848,16 +848,16 @@ toid</ColNames>
       <RefColNames>userid</RefColNames>
     </foreign-key>
     <trigger id="110" parent="31" name="pendingfriend_already_friends">
-      <ObjectId>28203</ObjectId>
-      <StateNumber>5035</StateNumber>
+      <ObjectId>28214</ObjectId>
+      <StateNumber>5078</StateNumber>
       <Turn>before-row</Turn>
       <Events>I</Events>
       <FireMode>origin</FireMode>
       <CallRoutineId>19855</CallRoutineId>
     </trigger>
     <trigger id="111" parent="31" name="pendingfriend_make_friends">
-      <ObjectId>28204</ObjectId>
-      <StateNumber>5038</StateNumber>
+      <ObjectId>28215</ObjectId>
+      <StateNumber>5081</StateNumber>
       <Turn>before-row</Turn>
       <Events>I</Events>
       <FireMode>origin</FireMode>
@@ -921,8 +921,8 @@ userid</ColNames>
       <RefColNames>userid</RefColNames>
     </foreign-key>
     <trigger id="119" parent="32" name="pendinggroup_already_member">
-      <ObjectId>28206</ObjectId>
-      <StateNumber>5044</StateNumber>
+      <ObjectId>28217</ObjectId>
+      <StateNumber>5087</StateNumber>
       <Turn>before-row</Turn>
       <Events>I</Events>
       <FireMode>origin</FireMode>
@@ -1015,8 +1015,8 @@ userid</ColNames>
       <Predicate>(name)::text ~~ &apos;% %&apos;::text</Predicate>
     </check>
     <trigger id="133" parent="33" name="user_remove_from_groups">
-      <ObjectId>28211</ObjectId>
-      <StateNumber>5058</StateNumber>
+      <ObjectId>28222</ObjectId>
+      <StateNumber>5102</StateNumber>
       <Turn>before-row</Turn>
       <Events>D</Events>
       <FireMode>origin</FireMode>
