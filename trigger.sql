@@ -44,6 +44,7 @@ BEGIN
     IF EXISTS (SELECT FROM friend f
                 WHERE new.userID1=f.userID2
                     AND new.userID2=f.userID1) THEN
+        RAISE EXCEPTION 'users are already friends';
         return null;
     ELSE
         return new;
@@ -70,6 +71,7 @@ BEGIN
                     AND f.userID2=new.toID
                      OR f.userID1=new.toID
                     AND f.userID2=new.fromID) THEN
+        RAISE EXCEPTION 'users are already friends';
         return null;
     ELSE
         return new;
@@ -148,6 +150,7 @@ BEGIN
         WHERE new.gID=gm.gID
           AND new.userID=gm.userID
     ) THEN
+        RAISE EXCEPTION 'user already in group';
         return null;
     ELSE
         return new;
@@ -199,6 +202,7 @@ BEGIN
     ELSIF NEW.toUserID IS NOT NULL AND NEW.toGroupID IS NULL THEN
         return NEW;
     ELSE
+        RAISE EXCEPTION 'message must have a recipient';
         RETURN NULL;
     END IF;
 END;
@@ -228,6 +232,7 @@ BEGIN
     IF imembers < ilimit THEN
         return NEW;
     ELSE
+        RAISE EXCEPTION 'group is already at limit';
         return NULL;
     END IF;
 END;
@@ -265,7 +270,7 @@ END;
 $$ LANGUAGE 'plpgsql';
 
 DROP TRIGGER IF EXISTS message_addGroup_Recipient on messageInfo;
-CREATE TRIGGER message_addRecipient_User
+CREATE TRIGGER message_addGroup_Recipient
     AFTER INSERT
     ON messageInfo
     FOR EACH ROW
