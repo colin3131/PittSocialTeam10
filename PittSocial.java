@@ -306,7 +306,7 @@ public class PittSocial
 		System.out.println("2: Confirm/Deny Friend and Group Requests");
 		System.out.println("3: Display Friends");
 		System.out.println("4: Search For User");
-		System.out.println("5: Three Degrees Command");
+		System.out.println("5: Three Degress Command");
 		System.out.println("6: Back to Main Menu");
 		System.out.println("");
 		System.out.print("--> ");
@@ -331,7 +331,7 @@ public class PittSocial
 		}
 		else if(input.equals("5"))
 		{
-			threeDegrees();
+			threeDegress();
 		}
 		else
 		{
@@ -1197,9 +1197,33 @@ public class PittSocial
 	 * that user with at most 3 hop between them 
 	 * NOTE: A hop is defined as a friendship between any two users
 	 */
-	private static void threeDegrees()
+	private static void threeDegress()
 	{
-		
+		boolean loop = true;
+		Scanner sc = new Scanner(System.in);
+		System.out.println("\nFind the shortest (max 3) friendship path between you and another user.\n");
+		while(loop){
+			System.out.print("Enter a User ID, or 0 to exit: ");
+			if(sc.hasNextInt()){
+				int checkid = sc.nextInt();
+				sc.nextLine();
+
+				if(checkid == 0){loop = false;}
+				else{
+					ArrayList<Integer> currentpath = new ArrayList<Integer>();
+					ArrayList<Integer> shortestpath = new ArrayList<Integer>();
+					shortestpath.add(1, userID);
+					if(getFriendIDs(userID).contains(checkid)){
+						shortestpath.add(2, checkid);
+					}
+					else{
+						for(int friend1 : getFriendIDs(userID)){
+							// TODO
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	/** Display the top k users with respect to the number of messages sent to the 
