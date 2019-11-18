@@ -16,7 +16,6 @@ public class PittSocial
 {
 	private static String initialize;
 	private static boolean login;
-	private static String username;
 	private static boolean run;
 	private static String url;
 	private static String userDBMS;
@@ -139,7 +138,7 @@ public class PittSocial
 			while(tryLogin)
 			{
 				Scanner kbd2 = new Scanner(System.in);
-				System.out.print("Please enter your username: ");
+				System.out.print("Please enter your email: ");
 				String input1 = kbd2.nextLine();
 				System.out.print("Please enter your password: ");
 				String input2 = kbd2.nextLine();
@@ -150,7 +149,6 @@ public class PittSocial
 				{
 					System.out.println("Login Success!");
 					System.out.println("");
-					username = input1;
 					// Check to see if the user exists
 					login = true;
 					tryLogin = false;
@@ -196,7 +194,6 @@ public class PittSocial
 			boolean created = createUser(usernameInput, password, email, birthday);
 			if(created)
 			{
-				username = usernameInput;
 				login = true;
 				System.out.println("");
 			}
@@ -276,6 +273,7 @@ public class PittSocial
 	}
 	private static void group_options()
 	{
+		System.out.println("");
 		System.out.println("GROUP OPTIONS:");
 		System.out.println("1: Create a Group");
 		System.out.println("2: Join a Group");
@@ -301,6 +299,7 @@ public class PittSocial
 	}
 	private static void user_options()
 	{
+		System.out.println("");
 		System.out.println("USER OPTIONS:");
 		System.out.println("1: Send Friend Request");
 		System.out.println("2: Confirm/Deny Friend and Group Requests");
@@ -341,6 +340,7 @@ public class PittSocial
 	}
 	private static void message_options()
 	{
+		System.out.println("");
 		System.out.println("MESSAGE OPTIONS");
 		System.out.println("1: Send a Message to a User");
 		System.out.println("2: Send a Message to a Group");
@@ -381,6 +381,7 @@ public class PittSocial
 	}
 	private static void account_options()
 	{
+		System.out.println("");
 		System.out.println("ACCOUNT OPTIONS:");
 		System.out.println("1: Logout");
 		System.out.println("2: Delete Account");
@@ -418,16 +419,16 @@ public class PittSocial
 	 * @param password - the password of the user
 	 * @return boolean - true if logged in false otherwise
 	 */
-	private static boolean loginRequest(String username, String password)
+	private static boolean loginRequest(String email, String password)
 	{
 		boolean exists = false;
-		String SQL = "SELECT userid, name, password FROM profile";
+		String SQL = "SELECT userid, email, password FROM profile";
 		
 		try (Connection conn = connect();
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(SQL)) {
             // look for combo
-            exists = lookForUser(rs, username, password);
+            exists = lookForUser(rs, email, password);
             return exists;
 		}
 		catch(Exception e)
@@ -446,22 +447,42 @@ public class PittSocial
 	 * @return boolean - true if found, false otherwise
 	 * @throws SQLException
 	 */
-	private static boolean lookForUser(ResultSet rs, String username, String password) throws SQLException
+	private static boolean lookForUser(ResultSet rs, String email, String password) throws SQLException
 	{
 		boolean exists = false;
 		while(rs.next())
 		{
 			int tempID = rs.getInt("userid");
-			String tempName = rs.getString("name");
+			String tempEmail = rs.getString("email");
 			String tempPass = rs.getString("password");
-			if(username.equals(tempName) && password.equals(tempPass))
+			if(email.equals(tempEmail) && password.equals(tempPass))
 			{
 				userID = tempID;
+				updateLoginTime();
 				exists = true;
 				return exists;
 			}
 		}
 		return exists;
+	}
+	
+	private static void updateLoginTime()
+	{
+		String SQL = "UPDATE profile SET lastlogin = ? WHERE userid = ?";
+		Timestamp ts = new Timestamp(System.currentTimeMillis());
+		
+		try (Connection conn = connect();
+                PreparedStatement pstmt = conn.prepareStatement(SQL)) 
+		{
+			pstmt.setTimestamp(1, ts);
+            pstmt.setInt(2, userID);
+            
+            pstmt.executeUpdate();
+		}
+		catch(Exception l)
+		{
+			System.out.println(l.getMessage());
+		}
 	}
 	
 	/** This method creates a new user and inputs them into the DBMS, returning a true 
@@ -606,9 +627,11 @@ public class PittSocial
 	 * @param UID - The user ID of the User to grab
 	 * @return HashMap - returns a user's info (userid, name, email, date_of_birth, lastlogin)
 	 */
-	private static HashMap<String, Object> getUserInfo(int UID) throws Exception
+	@SuppressWarnings("unchecked")
+	private static Map<String, Object> getUserInfo(int UID) throws Exception
 	{
-		HashMap user = new HashMap<String, Object>();
+		@SuppressWarnings("rawtypes")
+		Map user = new HashMap<String, Object>();
 		String SQL = "SELECT * FROM profile WHERE userid=" + UID + "";
 
 		try (Connection conn = connect();
@@ -631,9 +654,11 @@ public class PittSocial
 	 * @param UID - The group ID of the Group to grab
 	 * @return HashMap - returns a bunch of key-value pairs of group info
 	 */
-	private static HashMap<String, Object> getGroupInfo(int GID) throws Exception
+	@SuppressWarnings("unchecked")
+	private static Map<String, Object> getGroupInfo(int GID) throws Exception
 	{
-		HashMap group = new HashMap<String, Object>();
+		@SuppressWarnings("rawtypes")
+		Map group = new HashMap<String, Object>();
 		String SQL = "SELECT * FROM groupInfo WHERE gid=" + GID + "";
 
 		try (Connection conn = connect();
@@ -745,6 +770,11 @@ public class PittSocial
 		}
 	}
 	
+	/** This method adds a user to a group
+	 * 
+	 * @param UID - User ID to add 
+	 * @param groupID - Group to add the UID to
+	 */
 	private static void addGroupCreator(int UID, int groupID)
 	{
 		String SQL = "INSERT INTO groupmember(gid, userid, role) " + "VALUES(?, ?, ?)";
@@ -1060,7 +1090,155 @@ public class PittSocial
 	 */
 	private static void sendMessageToUser()
 	{
+		boolean valid = true;
+		int UIDtosend = 0;
+		Scanner SMTUkbd = new Scanner(System.in);
+		System.out.print("To whom would you like to send a message [User ID]: ");
+		String UIDSend = SMTUkbd.nextLine();
 		
+		try
+		{
+			UIDtosend = Integer.parseInt(UIDSend);
+			String username = getUserName(UIDtosend);
+			if(username.equals("none"))
+			{
+				System.out.println("Invalid User ID [Does Not Exist]");
+				valid = false;
+			}
+			else
+			{
+				System.out.print("Sending message to " + username + ": is this correct [Yes/No]? ");
+				String sendornaw = SMTUkbd.nextLine();
+				if(sendornaw.equals("Yes"))
+				{
+					valid = true;
+				}
+				else
+				{
+					valid = false;
+					System.out.println("Message canceled");
+				}
+			}
+		}
+		catch(Exception l)
+		{
+			System.out.println("Invalid User ID [Must be a number]");
+			valid = false;
+		}
+		
+		if(valid)
+		{
+			System.out.print("Please enter the message to send: ");
+			String message = SMTUkbd.nextLine();
+			boolean continueMessage = true;
+			while(continueMessage)
+			{
+				System.out.println("Continue typing message? [Yes/No]");
+				String answer = SMTUkbd.nextLine();
+				if(answer.equals("Yes"))
+				{
+					System.out.println("Please enter the next part of the message: ");
+					String input = SMTUkbd.nextLine();
+					message = message.concat(" ");
+					message = message.concat(input);
+				}
+				else
+				{
+					continueMessage = false;
+				}
+			}
+			
+			System.out.println("Your message is as follows: " + message);
+			System.out.print("Do you want to send this message [Yes/No]?: ");
+			String input2 = SMTUkbd.nextLine();
+			if(input2.equals("Yes"))
+			{
+				sendMessageToUserSub(UIDtosend, message);
+			}
+			else
+			{
+				System.out.println("You canceled the message.");
+			}
+		}
+		System.out.println("");
+	}
+	
+	/** This is a helper method to sendMessageToUser. This will actually add the message 
+	 * to the DBMS
+	 * 
+	 * @param UIDtosend - user ID to send the message to
+	 * @param message - the message to send
+	 */
+	private static void sendMessageToUserSub(int UIDtosend, String message)
+	{
+		String SQL = "INSERT INTO messageinfo(msgid, fromid, message, touserid, timesent) " + "VALUES(?, ?, ?, ?, ?)";
+		
+		try (Connection conn = connect();
+                PreparedStatement pstmt = conn.prepareStatement(SQL)) 
+		{
+			Timestamp ts = new Timestamp(System.currentTimeMillis());
+			int MID = getNextMID();
+			pstmt.setInt(1, MID);
+            pstmt.setInt(2, userID);
+            pstmt.setString(3, message);
+            pstmt.setInt(4, UIDtosend);
+            pstmt.setTimestamp(5, ts);
+ 
+            pstmt.executeUpdate();
+            System.out.println("Message sent!");
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+			System.out.println("Error in sending message");
+		}
+	}
+	
+	/** This method gets the next Message ID for the primary key of creating a Message
+	 * 
+	 * @return int - the next MID to use
+	 */
+	private static int getNextMID() throws Exception
+	{
+		int id = 0;
+		String SQL = "SELECT msgid FROM messageinfo ORDER BY msgid DESC";
+		
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			while(rs.next())
+			{
+				id = rs.getInt("msgid");
+				id++;
+				return id;
+			}
+			return id;
+		}
+	}
+	
+	/** This method gets a username linked to an input User ID
+	 * 
+	 * @param userID - User ID to retrieve the username of
+	 * @return String - the username of the user
+	 * @throws Exception
+	 */
+	private static String getUserName(int userID) throws Exception
+	{
+		String username = "none";
+		String SQL = "SELECT name FROM profile WHERE userid=" + userID + "";
+
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			while(rs.next())
+			{
+				username = rs.getString("name");
+			}
+			
+			return username;
+		}
 	}
 	
 	/** This method will send a message to a group from the current user
@@ -1068,7 +1246,185 @@ public class PittSocial
 	 */
 	private static void sendMessageToGroup()
 	{
+		boolean valid = true;
+		int GIDtosend = 0;
+		Scanner SMTGkbd = new Scanner(System.in);
+		System.out.print("To what group would you like to send a message [Group ID]: ");
+		String GIDSend = SMTGkbd.nextLine();
 		
+		try
+		{
+			GIDtosend = Integer.parseInt(GIDSend);
+			String groupname = getGroupName(GIDtosend);
+			
+			if(groupname.equals("none"))
+			{
+				System.out.println("Invalid Group ID [Does Not Exist]");
+				valid = false;
+			}
+			else
+			{
+				boolean inGroup = userInGroup(GIDtosend, userID);
+				
+				if(inGroup)
+				{
+					System.out.print("Sending message to " + groupname + ": is this correct [Yes/No]? ");
+					String sendornaw = SMTGkbd.nextLine();
+					if(sendornaw.equals("Yes"))
+					{
+						valid = true;
+					}
+					else
+					{
+						valid = false;
+						System.out.println("Message canceled");
+					}
+				}
+				else
+				{
+					System.out.println("Invalid Credentials [Not in Group]");
+					valid = false;
+				}
+			}
+		}
+		catch(Exception l)
+		{
+			System.out.println("Invalid Group ID [Must be a number]");
+			valid = false;
+		}
+		
+		if(valid)
+		{
+			System.out.print("Please enter the message to send: ");
+			String message = SMTGkbd.nextLine();
+			boolean continueMessage = true;
+			while(continueMessage)
+			{
+				System.out.println("Continue typing message? [Yes/No]");
+				String answer = SMTGkbd.nextLine();
+				if(answer.equals("Yes"))
+				{
+					System.out.print("Please enter the next part of the message: ");
+					String input = SMTGkbd.nextLine();
+					message = message.concat(" ");
+					message = message.concat(input);
+				}
+				else
+				{
+					continueMessage = false;
+				}
+			}
+			
+			System.out.println("Your message is as follows: " + message);
+			System.out.print("Do you want to send this message [Yes/No]?: ");
+			String input2 = SMTGkbd.nextLine();
+			if(input2.equals("Yes"))
+			{
+				sendMessageToGroupSub(GIDtosend, message);
+			}
+			else
+			{
+				System.out.println("You canceled the message.");
+			}
+		}
+		System.out.println("");
+	}
+	
+	/** This method checks if a user is actually part of a given group
+	 * 
+	 * @param GID - group ID to check
+	 * @param UID - user ID to check
+	 * @return boolean - true if the UID is in the GID, false otherwise
+	 * @throws Exception
+	 */
+	private static boolean userInGroup(int GID, int UID) throws Exception
+	{
+		boolean inGroup = false;
+		String role = "none";
+		
+		String SQL = "SELECT role FROM groupmember WHERE gid=" + GID + " AND userid=" + UID +"";
+		
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			while(rs.next())
+			{
+				role = rs.getString("role");
+			}
+			
+			if(role.equals("none"))
+			{
+				inGroup = false;
+				return inGroup;
+			}
+			else
+			{
+				inGroup = true;
+				return inGroup;
+			}
+		}
+	}
+	
+	/** This method is a sub method to the sendMessageToGroup method
+	 * This will actually input the message into the messageinfo table 
+	 * in the corresponding DBMS
+	 * 
+	 * @param GIDtosend - Group ID to send the message to
+	 * @param message - the message to send
+	 */
+	private static void sendMessageToGroupSub(int GIDtosend, String message)
+	{
+		String SQL = "INSERT INTO messageinfo(msgid, fromid, message, togroupid, timesent) " + "VALUES(?, ?, ?, ?, ?)";
+		
+		try (Connection conn = connect();
+                PreparedStatement pstmt = conn.prepareStatement(SQL)) 
+		{
+			Timestamp ts = new Timestamp(System.currentTimeMillis());
+			int MID = getNextMID();
+			pstmt.setInt(1, MID);
+            pstmt.setInt(2, userID);
+            pstmt.setString(3, message);
+            pstmt.setInt(4, GIDtosend);
+            pstmt.setTimestamp(5, ts);
+ 
+            pstmt.executeUpdate();
+            System.out.println("Message sent!");
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+			System.out.println("Error in sending message");
+		}
+	}
+	
+	/** This method returns a group name given a group ID
+	 * 
+	 * @param groupID - group ID to get the name of
+	 * @return String - name of the group
+	 * @throws Exception
+	 */
+	private static String getGroupName(int groupID)
+	{
+		String username = "none";
+		String SQL = "SELECT name FROM groupinfo WHERE gid=" + groupID + "";
+
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			while(rs.next())
+			{
+				username = rs.getString("name");
+			}
+			
+			return username;
+		}
+		catch(Exception l)
+		{
+			System.out.println("Getting the group name failed");
+			return username;
+		}
 	}
 	
 	/** This method will display all messages received by the current user
