@@ -16,7 +16,6 @@ public class PittSocial
 {
 	private static String initialize;
 	private static boolean login;
-	private static String username;
 	private static boolean run;
 	private static String url;
 	private static String userDBMS;
@@ -139,7 +138,7 @@ public class PittSocial
 			while(tryLogin)
 			{
 				Scanner kbd2 = new Scanner(System.in);
-				System.out.print("Please enter your username: ");
+				System.out.print("Please enter your email: ");
 				String input1 = kbd2.nextLine();
 				System.out.print("Please enter your password: ");
 				String input2 = kbd2.nextLine();
@@ -150,7 +149,6 @@ public class PittSocial
 				{
 					System.out.println("Login Success!");
 					System.out.println("");
-					username = input1;
 					// Check to see if the user exists
 					login = true;
 					tryLogin = false;
@@ -196,7 +194,6 @@ public class PittSocial
 			boolean created = createUser(usernameInput, password, email, birthday);
 			if(created)
 			{
-				username = usernameInput;
 				login = true;
 				System.out.println("");
 			}
@@ -422,16 +419,16 @@ public class PittSocial
 	 * @param password - the password of the user
 	 * @return boolean - true if logged in false otherwise
 	 */
-	private static boolean loginRequest(String username, String password)
+	private static boolean loginRequest(String email, String password)
 	{
 		boolean exists = false;
-		String SQL = "SELECT userid, name, password FROM profile";
+		String SQL = "SELECT userid, email, password FROM profile";
 		
 		try (Connection conn = connect();
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(SQL)) {
             // look for combo
-            exists = lookForUser(rs, username, password);
+            exists = lookForUser(rs, email, password);
             return exists;
 		}
 		catch(Exception e)
@@ -450,22 +447,42 @@ public class PittSocial
 	 * @return boolean - true if found, false otherwise
 	 * @throws SQLException
 	 */
-	private static boolean lookForUser(ResultSet rs, String username, String password) throws SQLException
+	private static boolean lookForUser(ResultSet rs, String email, String password) throws SQLException
 	{
 		boolean exists = false;
 		while(rs.next())
 		{
 			int tempID = rs.getInt("userid");
-			String tempName = rs.getString("name");
+			String tempEmail = rs.getString("email");
 			String tempPass = rs.getString("password");
-			if(username.equals(tempName) && password.equals(tempPass))
+			if(email.equals(tempEmail) && password.equals(tempPass))
 			{
 				userID = tempID;
+				updateLoginTime();
 				exists = true;
 				return exists;
 			}
 		}
 		return exists;
+	}
+	
+	private static void updateLoginTime()
+	{
+		String SQL = "UPDATE profile SET lastlogin = ? WHERE userid = ?";
+		Timestamp ts = new Timestamp(System.currentTimeMillis());
+		
+		try (Connection conn = connect();
+                PreparedStatement pstmt = conn.prepareStatement(SQL)) 
+		{
+			pstmt.setTimestamp(1, ts);
+            pstmt.setInt(2, userID);
+            
+            pstmt.executeUpdate();
+		}
+		catch(Exception l)
+		{
+			System.out.println(l.getMessage());
+		}
 	}
 	
 	/** This method creates a new user and inputs them into the DBMS, returning a true 
@@ -610,8 +627,10 @@ public class PittSocial
 	 * @param UID - The user ID of the User to grab
 	 * @return HashMap - returns a bunch of key-value pairs of user info
 	 */
+	@SuppressWarnings("unchecked")
 	private static Map<String, Object> getUserInfo(int UID) throws Exception
 	{
+		@SuppressWarnings("rawtypes")
 		Map user = new HashMap<String, Object>();
 		String SQL = "SELECT * FROM profile WHERE userid=" + UID + "";
 
@@ -635,8 +654,10 @@ public class PittSocial
 	 * @param UID - The group ID of the Group to grab
 	 * @return HashMap - returns a bunch of key-value pairs of group info
 	 */
+	@SuppressWarnings("unchecked")
 	private static Map<String, Object> getGroupInfo(int GID) throws Exception
 	{
+		@SuppressWarnings("rawtypes")
 		Map group = new HashMap<String, Object>();
 		String SQL = "SELECT * FROM groupInfo WHERE gid=" + GID + "";
 
