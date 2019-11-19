@@ -16,7 +16,6 @@ public class PittSocial
 {
 	private static String initialize;
 	private static boolean login;
-	private static String username;
 	private static boolean run;
 	private static String url;
 	private static String userDBMS;
@@ -139,7 +138,7 @@ public class PittSocial
 			while(tryLogin)
 			{
 				Scanner kbd2 = new Scanner(System.in);
-				System.out.print("Please enter your username: ");
+				System.out.print("Please enter your email: ");
 				String input1 = kbd2.nextLine();
 				System.out.print("Please enter your password: ");
 				String input2 = kbd2.nextLine();
@@ -150,7 +149,6 @@ public class PittSocial
 				{
 					System.out.println("Login Success!");
 					System.out.println("");
-					username = input1;
 					// Check to see if the user exists
 					login = true;
 					tryLogin = false;
@@ -196,7 +194,6 @@ public class PittSocial
 			boolean created = createUser(usernameInput, password, email, birthday);
 			if(created)
 			{
-				username = usernameInput;
 				login = true;
 				System.out.println("");
 			}
@@ -234,8 +231,10 @@ public class PittSocial
 ///////////////////////////////////Menu Navigations///////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
+	// Main menu handler
 	private static void main_menu()
 	{
+		System.out.println("");
 		System.out.println("MAIN MENU:");
 		System.out.println("1: Group Options");
 		System.out.println("2: User Options");
@@ -274,6 +273,8 @@ public class PittSocial
 		}
 		
 	}
+	
+	// Group options handler
 	private static void group_options()
 	{
 		System.out.println("");
@@ -300,6 +301,8 @@ public class PittSocial
 			System.out.println("");
 		}
 	}
+	
+	// User options handler
 	private static void user_options()
 	{
 		System.out.println("");
@@ -341,6 +344,8 @@ public class PittSocial
 			System.out.println("");
 		}
 	}
+	
+	// Message options handler
 	private static void message_options()
 	{
 		System.out.println("");
@@ -382,6 +387,8 @@ public class PittSocial
 			System.out.println("");
 		}
 	}
+	
+	// Account options handler
 	private static void account_options()
 	{
 		System.out.println("");
@@ -415,34 +422,34 @@ public class PittSocial
 /////////////////////////////////////MAIN METHODS/////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	/** This method will login the user given the input of the username and password
-	 * This will return a boolean of true if the user + password combo is correct
+	/** This method will login the user given the input of the email and password
+	 * This will return a boolean of true if the email + password combo is correct
 	 * 
 	 * @param username - the first and last name of the user
 	 * @param password - the password of the user
 	 * @return boolean - true if logged in false otherwise
 	 */
-	private static boolean loginRequest(String username, String password)
+	private static boolean loginRequest(String email, String password)
 	{
 		boolean exists = false;
-		String SQL = "SELECT userid, name, password FROM profile";
+		String SQL = "SELECT userid, email, password FROM profile";
 		
 		try (Connection conn = connect();
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(SQL)) {
             // look for combo
-            exists = lookForUser(rs, username, password);
+            exists = lookForUser(rs, email, password);
             return exists;
 		}
 		catch(Exception e)
 		{
-			System.out.println("there was a prob");
+			System.out.println("Login Failure");
 			return exists;
 		}
 	}
 	
 	/** This method is a companion to the loginRequest method
-	 * this does the actual search for the user/password
+	 * this does the actual search for the email/password
 	 * 
 	 * @param rs - the result set 
 	 * @param username - the first and last name of the user
@@ -450,22 +457,42 @@ public class PittSocial
 	 * @return boolean - true if found, false otherwise
 	 * @throws SQLException
 	 */
-	private static boolean lookForUser(ResultSet rs, String username, String password) throws SQLException
+	private static boolean lookForUser(ResultSet rs, String email, String password) throws SQLException
 	{
 		boolean exists = false;
 		while(rs.next())
 		{
 			int tempID = rs.getInt("userid");
-			String tempName = rs.getString("name");
+			String tempEmail = rs.getString("email");
 			String tempPass = rs.getString("password");
-			if(username.equals(tempName) && password.equals(tempPass))
+			if(email.equals(tempEmail) && password.equals(tempPass))
 			{
 				userID = tempID;
+				updateLoginTime();
 				exists = true;
 				return exists;
 			}
 		}
 		return exists;
+	}
+	
+	private static void updateLoginTime()
+	{
+		String SQL = "UPDATE profile SET lastlogin = ? WHERE userid = ?";
+		Timestamp ts = new Timestamp(System.currentTimeMillis());
+		
+		try (Connection conn = connect();
+                PreparedStatement pstmt = conn.prepareStatement(SQL)) 
+		{
+			pstmt.setTimestamp(1, ts);
+            pstmt.setInt(2, userID);
+            
+            pstmt.executeUpdate();
+		}
+		catch(Exception l)
+		{
+			System.out.println(l.getMessage());
+		}
 	}
 	
 	/** This method creates a new user and inputs them into the DBMS, returning a true 
@@ -543,6 +570,7 @@ public class PittSocial
 	/** This method will send a friend request from the current user 
 	 * to a user of their choice
 	 */
+	@SuppressWarnings("rawtypes")
 	private static void initiateFriendship()
 	{
 		Scanner sc = new Scanner(System.in);
@@ -555,13 +583,13 @@ public class PittSocial
 			if(sc.hasNextInt()){
 				int toUserID = sc.nextInt();
 				sc.nextLine(); //Gotta consume the rest of this line
-				System.out.print("\nPlease enter a message to send with the request\n>");
+				System.out.print("\nPlease enter a message to send with the request\n\n--> ");
 				String message = sc.nextLine();
 				System.out.println();
 
 				// Pull all of the user's info
 				try{
-					Map user = getUserInfo(toUserID);
+					HashMap user = getUserInfo(toUserID);
 					System.out.print("Are you sure you'd like to add "+user.get("name")+"?\n(y/n): ");
 					if(sc.nextLine().equalsIgnoreCase("y")){
 
@@ -608,11 +636,13 @@ public class PittSocial
 
 	/** This method will pull all of the user info given a User ID
 	 * @param UID - The user ID of the User to grab
-	 * @return HashMap - returns a bunch of key-value pairs of user info
+	 * @return HashMap - returns a user's info (userid, name, email, date_of_birth, lastlogin)
 	 */
-	private static Map<String, Object> getUserInfo(int UID) throws Exception
+	@SuppressWarnings("unchecked")
+	private static HashMap<String, Object> getUserInfo(int UID) throws Exception
 	{
-		Map user = new HashMap<String, Object>();
+		@SuppressWarnings("rawtypes")
+		HashMap user = new HashMap<String, Object>();
 		String SQL = "SELECT * FROM profile WHERE userid=" + UID + "";
 
 		try (Connection conn = connect();
@@ -635,9 +665,11 @@ public class PittSocial
 	 * @param UID - The group ID of the Group to grab
 	 * @return HashMap - returns a bunch of key-value pairs of group info
 	 */
-	private static Map<String, Object> getGroupInfo(int GID) throws Exception
+	@SuppressWarnings("unchecked")
+	private static HashMap<String, Object> getGroupInfo(int GID) throws Exception
 	{
-		Map group = new HashMap<String, Object>();
+		@SuppressWarnings("rawtypes")
+		HashMap group = new HashMap<String, Object>();
 		String SQL = "SELECT * FROM groupInfo WHERE gid=" + GID + "";
 
 		try (Connection conn = connect();
@@ -784,6 +816,7 @@ public class PittSocial
 	/** This method will list all of the requests (friend and group [if group creator])
 	 * and the user will be able to selectively accept or deny requests
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void confirmRequests()
 	{
 		boolean chooseMore = true;
@@ -802,9 +835,9 @@ public class PittSocial
 						// Get the request details to print
 						HashMap<String, Object> grouprequest = groupReqs.get(i);
 						String reqmessage = grouprequest.get("message").toString();
-						Map<String, Object> reqgroup = getGroupInfo((int)grouprequest.get("gid"));
+						HashMap<String, Object> reqgroup = getGroupInfo((int)grouprequest.get("gid"));
 						String reqgn = reqgroup.get("name").toString();
-						Map<String, Object> requser = getUserInfo((int)grouprequest.get("userid"));
+						HashMap<String, Object> requser = getUserInfo((int)grouprequest.get("userid"));
 						String requn = requser.get("name").toString();
 
 						// Print the request
@@ -814,7 +847,7 @@ public class PittSocial
 						// Get the request details to print
 						HashMap<String, Object> userrequest = friendReqs.get(i - groupSize);
 						String reqmessage = userrequest.get("message").toString();
-						Map<String, Object> requser = getUserInfo((int)userrequest.get("fromid"));
+						HashMap<String, Object> requser = getUserInfo((int)userrequest.get("fromid"));
 						String requn = requser.get("name").toString();
 						System.out.println((i+1) + ". " + requn + " wants to be your friend: " + reqmessage);
 					}
@@ -956,6 +989,7 @@ public class PittSocial
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private static void denyAllRequests(int UID)
 	{
 		// First, get and delete all friend requests
@@ -997,6 +1031,7 @@ public class PittSocial
 	 * @param UID - The user who's requests we are querying for
 	 * @return ArrayList - A list of group requests (gid, userid, message)
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static ArrayList<HashMap> getGroupRequests(int UID) throws Exception
 	{
 		ArrayList<HashMap> grouprequests = new ArrayList<HashMap>();
@@ -1024,6 +1059,7 @@ public class PittSocial
 	 * @param UID - The user who's requests we are querying for
 	 * @return ArrayList - A list of group requests (fromid, message)
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static ArrayList<HashMap> getFriendRequests(int UID) throws Exception
 	{
 		ArrayList<HashMap> friendrequests = new ArrayList<HashMap>();
@@ -1499,9 +1535,100 @@ public class PittSocial
 	/** This method will list all of the current user's friends
 	 * 
 	 */
+	@SuppressWarnings("unchecked")
 	private static void displayFriends()
 	{
-		
+		try{
+			System.out.println("\n --- Your Friends --- \n");
+			System.out.println("User ID\tFriend Name");
+			System.out.println("-------\t---------");
+			for(HashMap<String, Object> friend : getFriends(userID)){
+				int friendid = (int)friend.get("userid");
+				String friendname = friend.get("name").toString();
+				System.out.println(friendid + "\t" + friendname);
+			}
+		}catch(Exception e){
+			System.out.println("Cannot find friends.");
+		}
+		boolean stillViewing = true;
+		Scanner sc = new Scanner(System.in);
+		while(stillViewing){
+			System.out.println("\nEnter a Friend's ID to view their profile, or 0 to return to Main Menu");
+			System.out.print(">");
+			if(sc.hasNextInt()){
+				int checkid = sc.nextInt();
+				sc.nextLine();
+				try{
+					if(checkid==0){ stillViewing=false;}
+					else if(getFriendIDs(userID).contains(checkid)){
+						
+							HashMap<String, Object> user = getUserInfo(checkid);
+							int friendid = (int)user.get("userid");
+							String friendname = user.get("name").toString();
+							String friendemail = user.get("email").toString();
+							Date frienddate = (Date)user.get("date_of_birth");
+							Timestamp friendlogin = (Timestamp)user.get("lastlogin");
+
+							System.out.println("\nUser ID:\t" + friendid);
+							System.out.println("-------");
+							System.out.println("\nName:\t\t" + friendname);
+							System.out.println("----");
+							System.out.println("\nEmail:\t\t" + friendemail);
+							System.out.println("-----");
+							System.out.println("\nDate of Birth:\t" + frienddate);
+							System.out.println("-------------");
+							System.out.println("\nLast Login:\t" + friendlogin);
+							System.out.println("----------");
+					}
+					else{
+						System.out.println("\nUser is not your friend.\n");
+					}
+				}catch(Exception e){
+					System.out.println("\nUser does not exist.\n");
+				}
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param UID - The user whose friends we are querying for
+	 * @return ArrayList - A list of friends (userid, name, email, date_of_birth, last_login)
+	 */
+	@SuppressWarnings("rawtypes")
+	private static ArrayList<HashMap> getFriends(int UID) throws Exception
+	{
+		ArrayList<HashMap> friends = new ArrayList<HashMap>();
+		for(int id : getFriendIDs(UID)){
+			friends.add(getUserInfo(id));
+		}
+		return friends;
+	}
+
+	/**
+	 * 
+	 * @param UID - The user whose friends we are querying for
+	 * @return ArrayList - A list of friend ids
+	 */
+	private static ArrayList<Integer> getFriendIDs(int UID) throws Exception
+	{
+		ArrayList<Integer> friends = new ArrayList<Integer>();
+		String SQL = "SELECT userid1, userid2 FROM friend WHERE userid1=" + UID + " OR userid2=" + UID + "";
+		try(
+			Connection conn = connect();
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(SQL)
+		){
+			while(rs.next()){
+				int id1 = rs.getInt("userid1");
+				int id2 = rs.getInt("userid2");
+				if(id1 == UID)
+					friends.add(id2);
+				else
+					friends.add(id1);
+			}
+		}
+		return friends;
 	}
 	
 	/** This method will search for a specific user, and return whether that 
@@ -1518,7 +1645,64 @@ public class PittSocial
 	 */
 	private static void threeDegress()
 	{
-		
+		boolean loop = true;
+		Scanner sc = new Scanner(System.in);
+		System.out.println("\nFind the shortest (max 3) friendship path between you and another user.\n");
+		while(loop){
+			System.out.print("Enter a User ID, or 0 to exit: ");
+			if(sc.hasNextInt()){
+				int checkid = sc.nextInt();
+				sc.nextLine();
+				
+				if(checkid == 0){loop = false;}
+				else{
+					try{
+						ArrayList<Integer> shortestpath = new ArrayList<Integer>();
+						shortestpath.add(0, userID);
+						if(getFriendIDs(userID).contains(checkid)){
+						}
+						else{
+							for(int friend1 : getFriendIDs(userID)){
+								if(getFriendIDs(friend1).contains(checkid)){
+									try{
+										shortestpath.remove(1);
+										shortestpath.remove(1);
+									}catch(Exception e){}
+									shortestpath.add(1, friend1);
+									break;
+								}
+								else{
+									for(int friend2 : getFriendIDs(friend1)){
+										if(getFriendIDs(friend2).contains(checkid) && shortestpath.size() != 3){
+											shortestpath.add(1, friend1);
+											shortestpath.add(2, friend2);
+											break;
+										}
+									}
+								}
+							}
+							shortestpath.add(checkid);
+						}
+
+						if(shortestpath.contains(checkid)){
+							System.out.println("\nPath was found between users " + userID + " and " + checkid + ":\n");
+							for(int friend : shortestpath){
+								if(friend != checkid){
+									System.out.print(friend + " > ");
+								}else{
+									System.out.print(friend + "\n\n");
+								}
+							}
+						}else{
+							System.out.println("\nNo path of 3 hops was found between users " + userID + " and " + checkid + ".\n");
+						}
+					}catch(Exception e){
+						e.printStackTrace();
+						System.out.println("Path find failed.");
+					}
+				}
+			}
+		}
 	}
 	
 	/** Display the top k users with respect to the number of messages sent to the 

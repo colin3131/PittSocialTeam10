@@ -81,7 +81,7 @@ create table messageRecipient
     msgID           integer NOT NULL,
     userID          integer NOT NULL,
 
-    CONSTRAINT messageRecipient_pk Primary Key (msgID),
+    CONSTRAINT messageRecipient_pk Primary Key (msgID, userID),
     CONSTRAINT messageRecipient_fk foreign Key (msgID) references messageInfo(msgID),
     CONSTRAINT messageRecipient_fk2 foreign Key (userID) references profile(userID)
 );
