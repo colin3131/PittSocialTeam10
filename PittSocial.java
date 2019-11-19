@@ -1487,7 +1487,7 @@ public class PittSocial
 		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
 		
 		int fromId = 0;
-		String SQL = "SELECT message FROM messageinfo WHERE touserid=" + userID + " AND timesent > " + lastLogin + "";
+		String SQL = "SELECT message FROM messageinfo WHERE touserid=" + userID + " AND timesent >= " + lastLogin + "";
 		//  " AND " + currentTime + "";
 
 		try (Connection conn = connect();
