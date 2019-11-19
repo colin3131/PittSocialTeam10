@@ -1446,15 +1446,16 @@ public class PittSocial
 	{
 		String tempmessage = "";
 		String fromUser = "";
+		Date lastLogin = getLastLogin();
 		
 		int fromId = 0;
-		String SQL = "SELECT message,fromid FROM messageinfo WHERE touserid=" + userID + " and ";
+		String SQL = "SELECT message,fromid FROM messageinfo WHERE touserid=" + userID + " and timesent > " + lastLogin + "";
 
 		try (Connection conn = connect();
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(SQL)) 
 		{
-			System.out.println("Hear are all of your messages \n ----------------------------------- \n");
+			System.out.println("Hear are all of your messages since you last logged in \n ----------------------------------- \n");
 			while(rs.next())
 			{
 				fromId = rs.getInt("fromid");
@@ -1472,8 +1473,27 @@ public class PittSocial
 		
 	}
 
-	private static void getLastLogin(){
-		// string
+	private static Date getLastLogin(){
+		Date lastlogin = new Date();
+
+		String SQL = "SELECT lastlogin FROM profile WHERE userid=" + userID + "";
+
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			while(rs.next())
+			{
+				lastlogin = rs.getDate("lastlogin");
+			}
+			return lastlogin;
+		}
+		catch(Exception l)
+		{
+			System.out.println("Could not retrieve the last login date of the User");
+			return lastlogin;
+		}
+
 	}
 	
 	/** This method will list all of the current user's friends
