@@ -1467,8 +1467,9 @@ public class PittSocial
 			}
 			System.out.println(" ---------------------------------- \n");
 		}
-		catch(Exception l)
+		catch(Exception e)
 		{
+			System.out.println(e.getMessage());
 			System.out.println("Getting your messages failed try again later");
 		}
 		
@@ -1483,19 +1484,21 @@ public class PittSocial
 		String tempmessage = "";
 		String fromUser = "";
 		Timestamp lastLogin = getLastLogin();
+		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
 		
 		int fromId = 0;
-		String SQL = "SELECT message,fromid FROM messageinfo WHERE touserid=" + userID + " and timesent > " + lastLogin + "";
+		String SQL = "SELECT message FROM messageinfo WHERE touserid=" + userID + " AND timesent > " + lastLogin + "";
+		//  " AND " + currentTime + "";
 
 		try (Connection conn = connect();
                 Statement stmt = conn.createStatement();
                 ResultSet rs = stmt.executeQuery(SQL)) 
 		{
-			System.out.println("Hear are all of your messages since you last logged in \n ----------------------------------- \n");
+			// System.out.println("Hear are all of your messages since you last logged in \n ----------------------------------- \n");
 			while(rs.next())
 			{
-				fromId = rs.getInt("fromid");
-				fromUser = getUserName(fromId);
+				// fromId = rs.getInt("fromid");
+				// fromUser = getUserName(fromId);
 				System.out.println(tempmessage + " \n \n messages from " + fromUser + " - \n");
 				tempmessage = rs.getString("message");
 				System.out.println(tempmessage + " \n \n ");
@@ -1504,8 +1507,10 @@ public class PittSocial
 		}
 		catch(Exception l)
 		{
-			System.out.println("Getting your messages failed try again later");
+			System.out.println("Failed getting new messages \n");
+			
 		}
+
 		
 	}
 
@@ -1636,6 +1641,41 @@ public class PittSocial
 	 */
 	private static void searchForUser()
 	{
+		String tempuser = "";
+		boolean founduser = false;
+		String tempuserCheck = "";
+		Scanner sc = new Scanner(System.in);
+	
+		System.out.print("Enter a username [first last] that you want to check the system if they are a user: ");
+		tempuser = sc.nextLine();
+		String SQL = "SELECT name FROM profile";
+
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			while(rs.next())
+				{
+						tempuserCheck = rs.getString("name");
+						if(tempuser.equals(tempuserCheck)){
+							founduser = true;
+						}
+						
+				}
+
+				if(founduser){
+					System.out.println("User is our system. Try adding them as a friend! \n");
+				}
+				else{
+					System.out.println("User is not in the system. Tell them to make an account. \n");
+				}
+				System.out.println(" ---------------------------------- \n");
+		}
+		catch(Exception l)
+		{
+			System.out.println("Could not get usernames in system ");
+		}
+
 		
 	}
 	
