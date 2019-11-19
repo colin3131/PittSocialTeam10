@@ -231,8 +231,10 @@ public class PittSocial
 ///////////////////////////////////Menu Navigations///////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
+	// Main menu handler
 	private static void main_menu()
 	{
+		System.out.println("");
 		System.out.println("MAIN MENU:");
 		System.out.println("1: Group Options");
 		System.out.println("2: User Options");
@@ -271,6 +273,8 @@ public class PittSocial
 		}
 		
 	}
+	
+	// Group options handler
 	private static void group_options()
 	{
 		System.out.println("");
@@ -297,6 +301,8 @@ public class PittSocial
 			System.out.println("");
 		}
 	}
+	
+	// User options handler
 	private static void user_options()
 	{
 		System.out.println("");
@@ -338,6 +344,8 @@ public class PittSocial
 			System.out.println("");
 		}
 	}
+	
+	// Message options handler
 	private static void message_options()
 	{
 		System.out.println("");
@@ -379,6 +387,8 @@ public class PittSocial
 			System.out.println("");
 		}
 	}
+	
+	// Account options handler
 	private static void account_options()
 	{
 		System.out.println("");
@@ -412,8 +422,8 @@ public class PittSocial
 /////////////////////////////////////MAIN METHODS/////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	/** This method will login the user given the input of the username and password
-	 * This will return a boolean of true if the user + password combo is correct
+	/** This method will login the user given the input of the email and password
+	 * This will return a boolean of true if the email + password combo is correct
 	 * 
 	 * @param username - the first and last name of the user
 	 * @param password - the password of the user
@@ -433,13 +443,13 @@ public class PittSocial
 		}
 		catch(Exception e)
 		{
-			System.out.println("there was a prob");
+			System.out.println("Login Failure");
 			return exists;
 		}
 	}
 	
 	/** This method is a companion to the loginRequest method
-	 * this does the actual search for the user/password
+	 * this does the actual search for the email/password
 	 * 
 	 * @param rs - the result set 
 	 * @param username - the first and last name of the user
@@ -560,6 +570,7 @@ public class PittSocial
 	/** This method will send a friend request from the current user 
 	 * to a user of their choice
 	 */
+	@SuppressWarnings("rawtypes")
 	private static void initiateFriendship()
 	{
 		Scanner sc = new Scanner(System.in);
@@ -572,7 +583,7 @@ public class PittSocial
 			if(sc.hasNextInt()){
 				int toUserID = sc.nextInt();
 				sc.nextLine(); //Gotta consume the rest of this line
-				System.out.print("\nPlease enter a message to send with the request\n>");
+				System.out.print("\nPlease enter a message to send with the request\n\n--> ");
 				String message = sc.nextLine();
 				System.out.println();
 
@@ -805,6 +816,7 @@ public class PittSocial
 	/** This method will list all of the requests (friend and group [if group creator])
 	 * and the user will be able to selectively accept or deny requests
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static void confirmRequests()
 	{
 		boolean chooseMore = true;
@@ -977,6 +989,7 @@ public class PittSocial
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private static void denyAllRequests(int UID)
 	{
 		// First, get and delete all friend requests
@@ -1018,6 +1031,7 @@ public class PittSocial
 	 * @param UID - The user who's requests we are querying for
 	 * @return ArrayList - A list of group requests (gid, userid, message)
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static ArrayList<HashMap> getGroupRequests(int UID) throws Exception
 	{
 		ArrayList<HashMap> grouprequests = new ArrayList<HashMap>();
@@ -1045,6 +1059,7 @@ public class PittSocial
 	 * @param UID - The user who's requests we are querying for
 	 * @return ArrayList - A list of group requests (fromid, message)
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private static ArrayList<HashMap> getFriendRequests(int UID) throws Exception
 	{
 		ArrayList<HashMap> friendrequests = new ArrayList<HashMap>();
@@ -1447,6 +1462,7 @@ public class PittSocial
 	/** This method will list all of the current user's friends
 	 * 
 	 */
+	@SuppressWarnings("unchecked")
 	private static void displayFriends()
 	{
 		try{
@@ -1506,6 +1522,7 @@ public class PittSocial
 	 * @param UID - The user whose friends we are querying for
 	 * @return ArrayList - A list of friends (userid, name, email, date_of_birth, last_login)
 	 */
+	@SuppressWarnings("rawtypes")
 	private static ArrayList<HashMap> getFriends(int UID) throws Exception
 	{
 		ArrayList<HashMap> friends = new ArrayList<HashMap>();
