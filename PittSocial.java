@@ -1773,7 +1773,21 @@ public class PittSocial
 	 */
 	private static void dropUser()
 	{
+		System.out.println("\nRemoving this user from the system...");
+
+		try{
+			String SQL = "DELETE FROM profile WHERE userid=?";
+			Connection conn = connect();
+            PreparedStatement pstmt = conn.prepareStatement(SQL);
 		
+			pstmt.setInt(1, userID);
+			pstmt.executeUpdate();
+			System.out.println("\nRemoval successful.\n");
+			login = false;
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+			System.out.println("Removal failed.");
+		}
 	}
 	
 	/** This method will exit the application and display
