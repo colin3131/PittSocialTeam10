@@ -1586,6 +1586,7 @@ public class PittSocial
 					try{
 						ArrayList<Integer> shortestpath = new ArrayList<Integer>();
 						shortestpath.add(0, userID);
+						boolean found=false;
 						if(getFriendIDs(userID).contains(checkid)){
 						}
 						else{
@@ -1595,23 +1596,25 @@ public class PittSocial
 										shortestpath.remove(1);
 										shortestpath.remove(1);
 									}catch(Exception e){}
+									found = true;
 									shortestpath.add(1, friend1);
 									break;
 								}
 								else{
 									for(int friend2 : getFriendIDs(friend1)){
-										if(getFriendIDs(friend2).contains(checkid) && shortestpath.size() != 3){
+										if(getFriendIDs(friend2).contains(checkid) && shortestpath.size() == 1){
 											shortestpath.add(1, friend1);
 											shortestpath.add(2, friend2);
+											found=true;
 											break;
 										}
 									}
 								}
 							}
-							shortestpath.add(checkid);
 						}
 
-						if(shortestpath.contains(checkid)){
+						if(found){
+							shortestpath.add(checkid);
 							System.out.println("\nPath was found between users " + userID + " and " + checkid + ":\n");
 							for(int friend : shortestpath){
 								if(friend != checkid){
