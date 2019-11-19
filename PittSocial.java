@@ -1411,6 +1411,30 @@ public class PittSocial
 	 */
 	private static void displayMessages()
 	{
+		String tempmessage = "";
+		String fromUser = "";
+		int fromId = 0;
+		String SQL = "SELECT message,fromid FROM messageinfo WHERE touserid=" + userID + "";
+
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			System.out.println("Hear are all of your messages \n ----------------------------------- \n");
+			while(rs.next())
+			{
+				fromId = rs.getInt("fromid");
+				fromUser = getUserName(fromId);
+				System.out.println(tempmessage + " \n \n messages from " + fromUser + " - \n");
+				tempmessage = rs.getString("message");
+				System.out.println(tempmessage + " \n \n ");
+			}
+			System.out.println(" ---------------------------------- \n");
+		}
+		catch(Exception l)
+		{
+			System.out.println("Getting your messages failed try again later");
+		}
 		
 	}
 	
@@ -1420,7 +1444,36 @@ public class PittSocial
 	 */
 	private static void displayNewMessages()
 	{
+		String tempmessage = "";
+		String fromUser = "";
 		
+		int fromId = 0;
+		String SQL = "SELECT message,fromid FROM messageinfo WHERE touserid=" + userID + " and ";
+
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			System.out.println("Hear are all of your messages \n ----------------------------------- \n");
+			while(rs.next())
+			{
+				fromId = rs.getInt("fromid");
+				fromUser = getUserName(fromId);
+				System.out.println(tempmessage + " \n \n messages from " + fromUser + " - \n");
+				tempmessage = rs.getString("message");
+				System.out.println(tempmessage + " \n \n ");
+			}
+			System.out.println(" ---------------------------------- \n");
+		}
+		catch(Exception l)
+		{
+			System.out.println("Getting your messages failed try again later");
+		}
+		
+	}
+
+	private static void getLastLogin(){
+		// string
 	}
 	
 	/** This method will list all of the current user's friends
