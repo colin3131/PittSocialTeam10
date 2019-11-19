@@ -262,7 +262,9 @@ BEGIN
         FETCH cur_groupMembers INTO rec_groupMember;
         EXIT WHEN NOT FOUND;
 
+        IF (NEW.fromid != rec_groupMember.userID) THEN
         INSERT INTO messageRecipient VALUES(NEW.msgID, rec_groupMember.userID);
+        END IF;
     END LOOP;
     CLOSE cur_groupMembers;
     RETURN NEW;
@@ -275,7 +277,7 @@ CREATE TRIGGER message_addGroup_Recipient
     ON messageInfo
     FOR EACH ROW
     WHEN (NEW.toUserID IS NULL)
-    EXECUTE PROCEDURE addRecipient();
+    EXECUTE PROCEDURE addGroupRecipient();
 
 -- TRIGGER 11:
 -- When a User is deleted, they should be removed from all of their groups.
