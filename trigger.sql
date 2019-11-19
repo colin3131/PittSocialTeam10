@@ -327,7 +327,7 @@ CREATE OR REPLACE FUNCTION removeUserFromMessageRecipient()
     RETURNS TRIGGER AS
 $$
 BEGIN
-    DELETE FROM messagemessageRecipient mr
+    DELETE FROM messageRecipient mr
     WHERE NEW.userID=mr.userID;
     RETURN NEW;
 END;
