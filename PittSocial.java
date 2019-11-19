@@ -628,10 +628,10 @@ public class PittSocial
 	 * @return HashMap - returns a user's info (userid, name, email, date_of_birth, lastlogin)
 	 */
 	@SuppressWarnings("unchecked")
-	private static Map<String, Object> getUserInfo(int UID) throws Exception
+	private static HashMap<String, Object> getUserInfo(int UID) throws Exception
 	{
 		@SuppressWarnings("rawtypes")
-		Map user = new HashMap<String, Object>();
+		HashMap user = new HashMap<String, Object>();
 		String SQL = "SELECT * FROM profile WHERE userid=" + UID + "";
 
 		try (Connection conn = connect();
@@ -655,10 +655,10 @@ public class PittSocial
 	 * @return HashMap - returns a bunch of key-value pairs of group info
 	 */
 	@SuppressWarnings("unchecked")
-	private static Map<String, Object> getGroupInfo(int GID) throws Exception
+	private static HashMap<String, Object> getGroupInfo(int GID) throws Exception
 	{
 		@SuppressWarnings("rawtypes")
-		Map group = new HashMap<String, Object>();
+		HashMap group = new HashMap<String, Object>();
 		String SQL = "SELECT * FROM groupInfo WHERE gid=" + GID + "";
 
 		try (Connection conn = connect();
@@ -1563,19 +1563,52 @@ public class PittSocial
 			if(sc.hasNextInt()){
 				int checkid = sc.nextInt();
 				sc.nextLine();
-
+				
 				if(checkid == 0){loop = false;}
 				else{
-					ArrayList<Integer> currentpath = new ArrayList<Integer>();
-					ArrayList<Integer> shortestpath = new ArrayList<Integer>();
-					shortestpath.add(1, userID);
-					if(getFriendIDs(userID).contains(checkid)){
-						shortestpath.add(2, checkid);
-					}
-					else{
-						for(int friend1 : getFriendIDs(userID)){
-							// TODO
+					try{
+						ArrayList<Integer> shortestpath = new ArrayList<Integer>();
+						shortestpath.add(0, userID);
+						if(getFriendIDs(userID).contains(checkid)){
 						}
+						else{
+							for(int friend1 : getFriendIDs(userID)){
+								if(getFriendIDs(friend1).contains(checkid)){
+									try{
+										shortestpath.remove(1);
+										shortestpath.remove(1);
+									}catch(Exception e){}
+									shortestpath.add(1, friend1);
+									break;
+								}
+								else{
+									for(int friend2 : getFriendIDs(friend1)){
+										if(getFriendIDs(friend2).contains(checkid) && shortestpath.size() != 3){
+											shortestpath.add(1, friend1);
+											shortestpath.add(2, friend2);
+											break;
+										}
+									}
+								}
+							}
+							shortestpath.add(checkid);
+						}
+
+						if(shortestpath.contains(checkid)){
+							System.out.println("\nPath was found between users " + userID + " and " + checkid + ":\n");
+							for(int friend : shortestpath){
+								if(friend != checkid){
+									System.out.print(friend + " > ");
+								}else{
+									System.out.print(friend + "\n\n");
+								}
+							}
+						}else{
+							System.out.println("\nNo path of 3 hops was found between users " + userID + " and " + checkid + ".\n");
+						}
+					}catch(Exception e){
+						e.printStackTrace();
+						System.out.println("Path find failed.");
 					}
 				}
 			}
