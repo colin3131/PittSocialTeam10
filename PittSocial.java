@@ -578,7 +578,7 @@ public class PittSocial
 
 				// Pull all of the user's info
 				try{
-					Map user = getUserInfo(toUserID);
+					HashMap user = getUserInfo(toUserID);
 					System.out.print("Are you sure you'd like to add "+user.get("name")+"?\n(y/n): ");
 					if(sc.nextLine().equalsIgnoreCase("y")){
 
@@ -625,7 +625,7 @@ public class PittSocial
 
 	/** This method will pull all of the user info given a User ID
 	 * @param UID - The user ID of the User to grab
-	 * @return HashMap - returns a bunch of key-value pairs of user info
+	 * @return HashMap - returns a user's info (userid, name, email, date_of_birth, lastlogin)
 	 */
 	@SuppressWarnings("unchecked")
 	private static Map<String, Object> getUserInfo(int UID) throws Exception
@@ -823,9 +823,9 @@ public class PittSocial
 						// Get the request details to print
 						HashMap<String, Object> grouprequest = groupReqs.get(i);
 						String reqmessage = grouprequest.get("message").toString();
-						Map<String, Object> reqgroup = getGroupInfo((int)grouprequest.get("gid"));
+						HashMap<String, Object> reqgroup = getGroupInfo((int)grouprequest.get("gid"));
 						String reqgn = reqgroup.get("name").toString();
-						Map<String, Object> requser = getUserInfo((int)grouprequest.get("userid"));
+						HashMap<String, Object> requser = getUserInfo((int)grouprequest.get("userid"));
 						String requn = requser.get("name").toString();
 
 						// Print the request
@@ -835,7 +835,7 @@ public class PittSocial
 						// Get the request details to print
 						HashMap<String, Object> userrequest = friendReqs.get(i - groupSize);
 						String reqmessage = userrequest.get("message").toString();
-						Map<String, Object> requser = getUserInfo((int)userrequest.get("fromid"));
+						HashMap<String, Object> requser = getUserInfo((int)userrequest.get("fromid"));
 						String requn = requser.get("name").toString();
 						System.out.println((i+1) + ". " + requn + " wants to be your friend: " + reqmessage);
 					}
@@ -1449,7 +1449,96 @@ public class PittSocial
 	 */
 	private static void displayFriends()
 	{
-		
+		try{
+			System.out.println("\n --- Your Friends --- \n");
+			System.out.println("User ID\tFriend Name");
+			System.out.println("-------\t---------");
+			for(HashMap<String, Object> friend : getFriends(userID)){
+				int friendid = (int)friend.get("userid");
+				String friendname = friend.get("name").toString();
+				System.out.println(friendid + "\t" + friendname);
+			}
+		}catch(Exception e){
+			System.out.println("Cannot find friends.");
+		}
+		boolean stillViewing = true;
+		Scanner sc = new Scanner(System.in);
+		while(stillViewing){
+			System.out.println("\nEnter a Friend's ID to view their profile, or 0 to return to Main Menu");
+			System.out.print(">");
+			if(sc.hasNextInt()){
+				int checkid = sc.nextInt();
+				sc.nextLine();
+				try{
+					if(checkid==0){ stillViewing=false;}
+					else if(getFriendIDs(userID).contains(checkid)){
+						
+							HashMap<String, Object> user = getUserInfo(checkid);
+							int friendid = (int)user.get("userid");
+							String friendname = user.get("name").toString();
+							String friendemail = user.get("email").toString();
+							Date frienddate = (Date)user.get("date_of_birth");
+							Timestamp friendlogin = (Timestamp)user.get("lastlogin");
+
+							System.out.println("\nUser ID:\t" + friendid);
+							System.out.println("-------");
+							System.out.println("\nName:\t\t" + friendname);
+							System.out.println("----");
+							System.out.println("\nEmail:\t\t" + friendemail);
+							System.out.println("-----");
+							System.out.println("\nDate of Birth:\t" + frienddate);
+							System.out.println("-------------");
+							System.out.println("\nLast Login:\t" + friendlogin);
+							System.out.println("----------");
+					}
+					else{
+						System.out.println("\nUser is not your friend.\n");
+					}
+				}catch(Exception e){
+					System.out.println("\nUser does not exist.\n");
+				}
+			}
+		}
+	}
+
+	/**
+	 * 
+	 * @param UID - The user whose friends we are querying for
+	 * @return ArrayList - A list of friends (userid, name, email, date_of_birth, last_login)
+	 */
+	private static ArrayList<HashMap> getFriends(int UID) throws Exception
+	{
+		ArrayList<HashMap> friends = new ArrayList<HashMap>();
+		for(int id : getFriendIDs(UID)){
+			friends.add(getUserInfo(id));
+		}
+		return friends;
+	}
+
+	/**
+	 * 
+	 * @param UID - The user whose friends we are querying for
+	 * @return ArrayList - A list of friend ids
+	 */
+	private static ArrayList<Integer> getFriendIDs(int UID) throws Exception
+	{
+		ArrayList<Integer> friends = new ArrayList<Integer>();
+		String SQL = "SELECT userid1, userid2 FROM friend WHERE userid1=" + UID + " OR userid2=" + UID + "";
+		try(
+			Connection conn = connect();
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(SQL)
+		){
+			while(rs.next()){
+				int id1 = rs.getInt("userid1");
+				int id2 = rs.getInt("userid2");
+				if(id1 == UID)
+					friends.add(id2);
+				else
+					friends.add(id1);
+			}
+		}
+		return friends;
 	}
 	
 	/** This method will search for a specific user, and return whether that 
@@ -1466,7 +1555,31 @@ public class PittSocial
 	 */
 	private static void threeDegress()
 	{
-		
+		boolean loop = true;
+		Scanner sc = new Scanner(System.in);
+		System.out.println("\nFind the shortest (max 3) friendship path between you and another user.\n");
+		while(loop){
+			System.out.print("Enter a User ID, or 0 to exit: ");
+			if(sc.hasNextInt()){
+				int checkid = sc.nextInt();
+				sc.nextLine();
+
+				if(checkid == 0){loop = false;}
+				else{
+					ArrayList<Integer> currentpath = new ArrayList<Integer>();
+					ArrayList<Integer> shortestpath = new ArrayList<Integer>();
+					shortestpath.add(1, userID);
+					if(getFriendIDs(userID).contains(checkid)){
+						shortestpath.add(2, checkid);
+					}
+					else{
+						for(int friend1 : getFriendIDs(userID)){
+							// TODO
+						}
+					}
+				}
+			}
+		}
 	}
 	
 	/** Display the top k users with respect to the number of messages sent to the 
