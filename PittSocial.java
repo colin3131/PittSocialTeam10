@@ -1446,7 +1446,7 @@ public class PittSocial
 	{
 		String tempmessage = "";
 		String fromUser = "";
-		Date lastLogin = getLastLogin();
+		Timestamp lastLogin = getLastLogin();
 		
 		int fromId = 0;
 		String SQL = "SELECT message,fromid FROM messageinfo WHERE touserid=" + userID + " and timesent > " + lastLogin + "";
@@ -1473,8 +1473,8 @@ public class PittSocial
 		
 	}
 
-	private static Date getLastLogin(){
-		Date lastlogin = new Date();
+	private static Timestamp getLastLogin(){
+		Timestamp lastlogin = new Timestamp(System.currentTimeMillis());
 
 		String SQL = "SELECT lastlogin FROM profile WHERE userid=" + userID + "";
 
@@ -1484,7 +1484,7 @@ public class PittSocial
 		{
 			while(rs.next())
 			{
-				lastlogin = rs.getDate("lastlogin");
+				lastlogin = rs.getTimestamp("lastlogin");
 			}
 			return lastlogin;
 		}
