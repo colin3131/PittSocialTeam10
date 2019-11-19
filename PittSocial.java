@@ -1587,7 +1587,9 @@ public class PittSocial
 						ArrayList<Integer> shortestpath = new ArrayList<Integer>();
 						shortestpath.add(0, userID);
 						boolean found=false;
+						boolean found2=false;
 						if(getFriendIDs(userID).contains(checkid)){
+							found=true;
 						}
 						else{
 							for(int friend1 : getFriendIDs(userID)){
@@ -1600,12 +1602,13 @@ public class PittSocial
 									shortestpath.add(1, friend1);
 									break;
 								}
-								else{
+								else if(!found2){
 									for(int friend2 : getFriendIDs(friend1)){
 										if(getFriendIDs(friend2).contains(checkid) && shortestpath.size() == 1){
 											shortestpath.add(1, friend1);
 											shortestpath.add(2, friend2);
 											found=true;
+											found2=true;
 											break;
 										}
 									}
