@@ -1,6 +1,7 @@
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.time.LocalDate;
 import java.util.Scanner;
 import java.util.HashMap;
@@ -1486,8 +1487,9 @@ public class PittSocial
 		Timestamp lastLogin = getLastLogin();
 		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
 		
+		System.out.println(lastLogin);
 		int fromId = 0;
-		String SQL = "SELECT message FROM messageinfo WHERE touserid=" + userID + " AND timesent >= " + lastLogin + "";
+		String SQL = "SELECT message FROM messageinfo WHERE touserid=" + userID + " AND timesent>=" + lastLogin + "";
 		//  " AND " + currentTime + "";
 
 		try (Connection conn = connect();
@@ -1505,8 +1507,9 @@ public class PittSocial
 			}
 			System.out.println(" ---------------------------------- \n");
 		}
-		catch(Exception l)
+		catch(Exception e)
 		{
+			System.out.println(e.getMessage());
 			System.out.println("Failed getting new messages \n");
 			
 		}
@@ -1751,8 +1754,47 @@ public class PittSocial
 	 */
 	private static void topMessages()
 	{
+		String tempUser = "";
+		int numMessages = 0;
+		Scanner sc = new Scanner(System.in);
+		Timestamp xTime = new Timestamp(System.currentTimeMillis());
+		System.out.println("Please enter the amount of top users you wish to see :");
+		int k = sc.nextInt();
+		sc.nextLine();
+		System.out.println("Please enter how many months back you wish to search in your messages you wish to see :");
+		int x = sc.nextInt();
+		sc.nextLine();
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(xTime.getTime());
+		cal.add(Calendar.MONTH, -(x));
+		xTime = new Timestamp(cal.getTime().getTime());
+
+		System.out.println("Here is the current time minus x months" + xTime);
+
+		String SQL = "SELECT fromid, count(fromid) AS totalMessages FROM messageinfo WHERE touserid = " + userID + " AND timesent > "+ xTime +" GROUP BY fromid ORDER BY totalMessages DESC LIMIT " + k + "";
+
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			while(rs.next())
+				{
+					
+				}
+				System.out.println(" ---------------------------------- \n");
+		}
+		catch(Exception l)
+		{
+			System.out.println("Could not get top messages in system ");
+		}
+
+
+
 		
 	}
+
+
 	
 	/** This method will log a user out, sending you back to the 
 	 * login screen
