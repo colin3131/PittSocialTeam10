@@ -811,7 +811,16 @@ public class PittSocial
 	 */
 	private static void initiateAddingGroup()
 	{
-		
+		//getting user input for message and group 
+		String message ="";
+		int groupid =0;
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Enter the group Id that you want to join:");
+		groupid = sc.nextInt();
+		sc.nextLine();
+		System.out.println("Please enter how many months back you wish to search in your messages you wish to see :");
+		int x = sc.nextInt();
+
 	}
 	
 	/** This method will list all of the requests (friend and group [if group creator])
