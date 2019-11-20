@@ -1,6 +1,7 @@
 import java.sql.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.time.LocalDate;
 import java.util.Scanner;
 import java.util.HashMap;
@@ -1486,27 +1487,31 @@ public class PittSocial
 		Timestamp lastLogin = getLastLogin();
 		Timestamp currentTime = new Timestamp(System.currentTimeMillis());
 		
+		// System.out.println(lastLogin);
 		int fromId = 0;
-		String SQL = "SELECT message FROM messageinfo WHERE touserid=" + userID + " AND timesent >= " + lastLogin + "";
-		//  " AND " + currentTime + "";
+		String SQL = "SELECT message, fromid FROM messageinfo WHERE touserid=? AND timesent>=?";
 
-		try (Connection conn = connect();
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(SQL)) 
-		{
+		try{ 
+			Connection conn = connect();
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			pstmt.setInt(1, userID);
+			pstmt.setTimestamp(2, lastLogin);
+			ResultSet rs = pstmt.executeQuery();
+		
 			// System.out.println("Hear are all of your messages since you last logged in \n ----------------------------------- \n");
 			while(rs.next())
 			{
-				// fromId = rs.getInt("fromid");
-				// fromUser = getUserName(fromId);
+				fromId = rs.getInt("fromid");
+				fromUser = getUserName(fromId);
 				System.out.println(tempmessage + " \n \n messages from " + fromUser + " - \n");
 				tempmessage = rs.getString("message");
 				System.out.println(tempmessage + " \n \n ");
 			}
 			System.out.println(" ---------------------------------- \n");
 		}
-		catch(Exception l)
+		catch(Exception e)
 		{
+			System.out.println(e.getMessage());
 			System.out.println("Failed getting new messages \n");
 			
 		}
@@ -1757,8 +1762,56 @@ public class PittSocial
 	 */
 	private static void topMessages()
 	{
+		String tempUser = "";
+		int numMessages = 0;
+		Scanner sc = new Scanner(System.in);
+		Timestamp xTime = new Timestamp(System.currentTimeMillis());
+		System.out.println("Please enter the amount of top users you wish to see :");
+		int k = sc.nextInt();
+		sc.nextLine();
+		System.out.println("Please enter how many months back you wish to search in your messages you wish to see :");
+		int x = sc.nextInt();
+		sc.nextLine();
+		int pos = 1;
+
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(xTime.getTime());
+		cal.add(Calendar.MONTH, -(x));
+		xTime = new Timestamp(cal.getTime().getTime());
+
+		System.out.println("Here is the current time minus x months" + xTime);
+
+		String SQL = "SELECT fromid, count(fromid) AS totalMessages FROM messageinfo WHERE touserid=? AND timesent>? GROUP BY fromid ORDER BY totalMessages DESC LIMIT ?";
+
+		try{
+			Connection conn = connect();
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			pstmt.setInt(1, userID);
+			pstmt.setTimestamp(2, xTime);
+			pstmt.setInt(3, k);
+			ResultSet rs = pstmt.executeQuery();
+
+			while(rs.next())
+				{
+					tempUser = getUserName(rs.getInt("fromid"));
+					numMessages = rs.getInt("totalMessages");
+					System.out.println("Positsion " + pos + " : "+ tempUser +" with "+ numMessages +" messages. \n \n");
+					pos++;
+				}
+				System.out.println(" ---------------------------------- \n");
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			System.out.println("Could not get top messages in system ");
+		}
+
+
+
 		
 	}
+
+
 	
 	/** This method will log a user out, sending you back to the 
 	 * login screen
