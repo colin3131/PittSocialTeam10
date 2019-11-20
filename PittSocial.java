@@ -579,9 +579,11 @@ public class PittSocial
 		boolean requestNotSent = true;
 		while(requestNotSent){
 			System.out.print("Please enter the User ID to request: ");
-			if(sc.hasNextInt()){
-				int toUserID = sc.nextInt();
-				sc.nextLine(); //Gotta consume the rest of this line
+			String toUserIDD = sc.nextLine();
+			try
+			{
+				int toUserID = Integer.parseInt(toUserIDD);
+				
 				System.out.print("Please enter a message to send with the request: ");
 				String message = sc.nextLine();
 				System.out.println();
@@ -619,8 +621,9 @@ public class PittSocial
 					System.out.println("\nPlease enter a valid User ID.\n");
 				}
 			}
-			else{ // If the input isn't an integer, make 'em retry
-				System.out.println("\nPlease enter a valid User ID.\n");
+			catch(Exception l)
+			{
+				System.out.println("Please input a number for User ID");
 			}
 		}
 
@@ -820,17 +823,18 @@ public class PittSocial
 		boolean requestNotSent = true;
 		while(requestNotSent){
 			System.out.print("Please enter the Group ID you wish to join: ");
-			if(sc.hasNextInt()){
-				int groupid = sc.nextInt();
-				sc.nextLine(); //Gotta consume the rest of this line
-				System.out.print("\nPlease enter a message to send with the request\n\n--> ");
+			String groupidd = sc.nextLine();
+			try
+			{
+				int groupid = Integer.parseInt(groupidd);
+				System.out.print("Please enter a message to send with the request: ");
 				String message = sc.nextLine();
 				System.out.println();
 
 				// Pull all of the user's info
 				try{
 		
-					System.out.print("Are you sure you'd like to join group "+ groupid +"?\n(y/n): ");
+					System.out.print("Are you sure you'd like to join Group "+ groupid +" [y/n]: ");
 					if(sc.nextLine().equalsIgnoreCase("y")){
 
 						//We have all the vars, construct our insert
@@ -859,8 +863,9 @@ public class PittSocial
 					System.out.println("\nPlease enter a valid Group ID.\n");
 				}
 			}
-			else{ // If the input isn't an integer, make 'em retry
-				System.out.println("\nPlease enter a valid Group ID.\n");
+			catch(Exception l)
+			{
+				System.out.println("Please input a number for the Group ID");
 			}
 		}
 
