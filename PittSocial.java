@@ -1,11 +1,9 @@
 import java.sql.*;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.time.LocalDate;
 import java.util.Scanner;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.ArrayList;
 
 /** This is the PittSocial 1555 Application
@@ -156,7 +154,7 @@ public class PittSocial
 				}
 				else
 				{
-					System.out.println("Username + Password combination does not exist...");
+					System.out.println("Username + Password combination does not exist...\n");
 					System.out.println("Would you like to: ");
 					System.out.println("1: Try Again");
 					System.out.println("2: Go Back to Main Page");
@@ -235,7 +233,6 @@ public class PittSocial
 	// Main menu handler
 	private static void main_menu()
 	{
-		System.out.println("");
 		System.out.println("MAIN MENU:");
 		System.out.println("1: Group Options");
 		System.out.println("2: User Options");
@@ -541,6 +538,7 @@ public class PittSocial
 		catch(Exception g)
 		{
 			System.out.println("Incorrect Date Format");
+			System.out.println("");
 			return false;
 		}
 	}
@@ -584,14 +582,14 @@ public class PittSocial
 			if(sc.hasNextInt()){
 				int toUserID = sc.nextInt();
 				sc.nextLine(); //Gotta consume the rest of this line
-				System.out.print("\nPlease enter a message to send with the request\n\n--> ");
+				System.out.print("Please enter a message to send with the request: ");
 				String message = sc.nextLine();
 				System.out.println();
 
 				// Pull all of the user's info
 				try{
 					HashMap user = getUserInfo(toUserID);
-					System.out.print("Are you sure you'd like to add "+user.get("name")+"?\n(y/n): ");
+					System.out.print("Are you sure you'd like to add "+user.get("name")+" [y/n]: ");
 					if(sc.nextLine().equalsIgnoreCase("y")){
 
 						//We have all the vars, construct our insert
@@ -613,6 +611,7 @@ public class PittSocial
 						}
 					}
 					else{
+						System.out.println("Friend Request Canceled");
 						break;
 					}
 				} catch(Exception e){
@@ -717,10 +716,12 @@ public class PittSocial
 		if(createdGroup)
 		{
 			System.out.println("Group Successfully Created!");
+			System.out.println("");
 		}
 		else
 		{
 			System.out.println("Group Failed to be Created");
+			System.out.println("");
 		}
 	}
 	
@@ -890,8 +891,8 @@ public class PittSocial
 				int groupSize = groupReqs.size();
 				int friendSize = friendReqs.size();
 
-				System.out.println("\nOutstanding Friend and Group Requests");
-				System.out.println(" 0. Deny all requests and return to main.");
+				System.out.println("\nOutstanding Friend and Group Requests:");
+				System.out.println("0: Deny all requests and return to main.");
 				for(int i = 0; i < (groupSize + friendSize); i++){
 					if(i < groupSize){
 						// Get the request details to print
@@ -903,7 +904,7 @@ public class PittSocial
 						String requn = requser.get("name").toString();
 
 						// Print the request
-						System.out.println((i+1) + ". " + requn + " is requesting to join " + reqgn + ": " + reqmessage);
+						System.out.println((i+1) + ": " + requn + " is requesting to join " + reqgn + ": " + reqmessage);
 					}
 					else{
 						// Get the request details to print
@@ -911,19 +912,20 @@ public class PittSocial
 						String reqmessage = userrequest.get("message").toString();
 						HashMap<String, Object> requser = getUserInfo((int)userrequest.get("fromid"));
 						String requn = requser.get("name").toString();
-						System.out.println((i+1) + ". " + requn + " wants to be your friend: " + reqmessage);
+						System.out.println((i+1) + ": " + requn + " wants to be your friend: " + reqmessage);
 					}
 				}
 				
 				// Allow user to choose an option
 				Scanner sc = new Scanner(System.in);
-				System.out.print("\nChoose a request to accept: ");
+				System.out.print("\nChoose a request to accept [#]: ");
 				if(sc.hasNextInt()){
 					// Grab the choice
 					int choice = sc.nextInt();
 					sc.nextLine();
 
 					if(choice == 0){ // Deny all requests
+						System.out.println("Remaining requests denied... Returning to main menu...\n");
 						denyAllRequests(userID);
 						chooseMore = false;
 					}else if(choice <= groupSize){ // Accept a group join request
@@ -945,9 +947,9 @@ public class PittSocial
 						String message = userrequest.get("message").toString();
 						boolean successful = confirmFriend(toID, fromID, message);
 						if(successful){
-							System.out.println("\nSuccessfully added friend.\n");
+							System.out.println("\nSuccessfully added friend.");
 						}else{
-							System.out.println("\nAccepting friend request failed.\n");
+							System.out.println("\nAccepting friend request failed.");
 						}
 					}
 				}
@@ -1523,11 +1525,11 @@ public class PittSocial
 			{
 				fromId = rs.getInt("fromid");
 				fromUser = getUserName(fromId);
-				System.out.println(tempmessage + " \n \n messages from " + fromUser + " - \n");
+				System.out.println("Message from " + fromUser + ": ");
 				tempmessage = rs.getString("message");
-				System.out.println(tempmessage + " \n \n ");
+				System.out.println(tempmessage + "\n");
 			}
-			System.out.println(" ---------------------------------- \n");
+			System.out.println(" ----------------------------------- \n");
 		}
 		catch(Exception e)
 		{
@@ -1559,14 +1561,14 @@ public class PittSocial
 			pstmt.setTimestamp(2, lastLogin);
 			ResultSet rs = pstmt.executeQuery();
 		
-			// System.out.println("Hear are all of your messages since you last logged in \n ----------------------------------- \n");
+			System.out.println("Hear are all of your messages since you last logged in \n ----------------------------------- \n");
 			while(rs.next())
 			{
 				fromId = rs.getInt("fromid");
 				fromUser = getUserName(fromId);
-				System.out.println(tempmessage + " \n \n messages from " + fromUser + " - \n");
+				System.out.println("Message from " + fromUser + ": ");
 				tempmessage = rs.getString("message");
-				System.out.println(tempmessage + " \n \n ");
+				System.out.println(tempmessage + "\n");
 			}
 			System.out.println(" ---------------------------------- \n");
 		}
@@ -1612,7 +1614,7 @@ public class PittSocial
 		try{
 			System.out.println("\n --- Your Friends --- \n");
 			System.out.println("User ID\tFriend Name");
-			System.out.println("-------\t---------");
+			System.out.println("-------\t-----------");
 			for(HashMap<String, Object> friend : getFriends(userID)){
 				int friendid = (int)friend.get("userid");
 				String friendname = friend.get("name").toString();
@@ -1624,13 +1626,16 @@ public class PittSocial
 		boolean stillViewing = true;
 		Scanner sc = new Scanner(System.in);
 		while(stillViewing){
-			System.out.println("\nEnter a Friend's ID to view their profile, or 0 to return to Main Menu");
-			System.out.print(">");
+			System.out.print("\nEnter a Friend's ID to view their profile, or 0 to return to main menu: ");
 			if(sc.hasNextInt()){
 				int checkid = sc.nextInt();
 				sc.nextLine();
 				try{
-					if(checkid==0){ stillViewing=false;}
+					if(checkid==0)
+					{ 
+						System.out.println("Returning to main menu...\n");
+						stillViewing=false;
+					}
 					else if(getFriendIDs(userID).contains(checkid)){
 						
 							HashMap<String, Object> user = getUserInfo(checkid);
@@ -1735,11 +1740,11 @@ public class PittSocial
 				else{
 					System.out.println("User is not in the system. Tell them to make an account. \n");
 				}
-				System.out.println(" ---------------------------------- \n");
+				//System.out.println(" ---------------------------------- \n");
 		}
 		catch(Exception l)
 		{
-			System.out.println("Could not get usernames in system ");
+			System.out.println("Could not get usernames in system\n");
 		}
 
 		
@@ -1756,11 +1761,16 @@ public class PittSocial
 		System.out.println("\nFind the shortest (max 3) friendship path between you and another user.\n");
 		while(loop){
 			System.out.print("Enter a User ID, or 0 to exit: ");
-			if(sc.hasNextInt()){
-				int checkid = sc.nextInt();
-				sc.nextLine();
+			String input = sc.nextLine();
+			try
+			{
+				int checkid = Integer.parseInt(input);
 				
-				if(checkid == 0){loop = false;}
+				if(checkid == 0)
+				{
+					System.out.println("Exiting to main menu...\n");
+					loop = false;
+				}
 				else{
 					try{
 						ArrayList<Integer> shortestpath = new ArrayList<Integer>();
@@ -1814,6 +1824,10 @@ public class PittSocial
 					}
 				}
 			}
+			catch(Exception e)
+			{
+				System.out.println("Please enter a number!\n");
+			}
 		}
 	}
 	
@@ -1827,49 +1841,52 @@ public class PittSocial
 		int numMessages = 0;
 		Scanner sc = new Scanner(System.in);
 		Timestamp xTime = new Timestamp(System.currentTimeMillis());
-		System.out.println("Please enter the amount of top users you wish to see :");
-		int k = sc.nextInt();
-		sc.nextLine();
-		System.out.println("Please enter how many months back you wish to search in your messages you wish to see :");
-		int x = sc.nextInt();
-		sc.nextLine();
+		System.out.print("Please enter the amount of top users you wish to see: ");
+		String kk = sc.nextLine();
+		System.out.print("Please enter how many months back you wish to search in your messages you wish to see: ");
+		String xx = sc.nextLine();
 		int pos = 1;
 
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(xTime.getTime());
-		cal.add(Calendar.MONTH, -(x));
-		xTime = new Timestamp(cal.getTime().getTime());
-
-		System.out.println("Here is the current time minus x months" + xTime);
-
-		String SQL = "SELECT fromid, count(fromid) AS totalMessages FROM messageinfo WHERE touserid=? AND timesent>? GROUP BY fromid ORDER BY totalMessages DESC LIMIT ?";
-
-		try{
-			Connection conn = connect();
-			PreparedStatement pstmt = conn.prepareStatement(SQL);
-			pstmt.setInt(1, userID);
-			pstmt.setTimestamp(2, xTime);
-			pstmt.setInt(3, k);
-			ResultSet rs = pstmt.executeQuery();
-
-			while(rs.next())
-				{
-					tempUser = getUserName(rs.getInt("fromid"));
-					numMessages = rs.getInt("totalMessages");
-					System.out.println("Positsion " + pos + " : "+ tempUser +" with "+ numMessages +" messages. \n \n");
-					pos++;
-				}
-				System.out.println(" ---------------------------------- \n");
-		}
-		catch(Exception e)
+		try
 		{
-			e.printStackTrace();
-			System.out.println("Could not get top messages in system ");
+			int x = Integer.parseInt(xx);
+			int k = Integer.parseInt(kk);
+			Calendar cal = Calendar.getInstance();
+			cal.setTimeInMillis(xTime.getTime());
+			cal.add(Calendar.MONTH, -(x));
+			xTime = new Timestamp(cal.getTime().getTime());
+	
+			System.out.println("\nHere is the current time minus " + x + " months: " + xTime);
+	
+			String SQL = "SELECT fromid, count(fromid) AS totalMessages FROM messageinfo WHERE touserid=? AND timesent>? GROUP BY fromid ORDER BY totalMessages DESC LIMIT ?";
+	
+			try{
+				Connection conn = connect();
+				PreparedStatement pstmt = conn.prepareStatement(SQL);
+				pstmt.setInt(1, userID);
+				pstmt.setTimestamp(2, xTime);
+				pstmt.setInt(3, k);
+				ResultSet rs = pstmt.executeQuery();
+	
+				while(rs.next())
+					{
+						tempUser = getUserName(rs.getInt("fromid"));
+						numMessages = rs.getInt("totalMessages");
+						System.out.println("Position " + pos + " : "+ tempUser +" with "+ numMessages +" messages.");
+						pos++;
+					}
+					System.out.println("");
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				System.out.println("Could not get top messages in system ");
+			}
 		}
-
-
-
-		
+		catch(Exception l)
+		{
+			System.out.println("Please input numbers only!\n");
+		}
 	}
 
 
