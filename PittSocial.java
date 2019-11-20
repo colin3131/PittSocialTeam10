@@ -812,7 +812,68 @@ public class PittSocial
 	 */
 	private static void initiateAddingGroup()
 	{
+		//getting user input for message and group 
+		Scanner sc = new Scanner(System.in);
+
+		// notValid: Keep the loop running while the input is invalid
+		// requestNotSent: Keep the loop running while no request was sent
+		boolean requestNotSent = true;
+		while(requestNotSent){
+			System.out.print("Please enter the Group ID you wish to join: ");
+			if(sc.hasNextInt()){
+				int groupid = sc.nextInt();
+				sc.nextLine(); //Gotta consume the rest of this line
+				System.out.print("\nPlease enter a message to send with the request\n\n--> ");
+				String message = sc.nextLine();
+				System.out.println();
+
+				// Pull all of the user's info
+				try{
 		
+					System.out.print("Are you sure you'd like to join group "+ groupid +"?\n(y/n): ");
+					if(sc.nextLine().equalsIgnoreCase("y")){
+
+						//We have all the vars, construct our insert
+						try{
+							String SQL = "INSERT INTO pendinggroupmember VALUES(?, ?, ?)";
+							Connection conn = connect();
+							PreparedStatement pstmt = conn.prepareStatement(SQL);
+							pstmt.setInt(1, groupid);
+							pstmt.setInt(2, userID);
+							pstmt.setString(3, message);
+							pstmt.executeUpdate();
+
+							// If we get here, request was sent.
+							requestNotSent = false;
+						}
+						catch(Exception e){
+							System.out.println(e.getMessage());
+							break;
+						}
+					}
+					else{
+						break;
+					}
+				} catch(Exception e){
+					System.out.println(e.getMessage());
+					System.out.println("\nPlease enter a valid Group ID.\n");
+				}
+			}
+			else{ // If the input isn't an integer, make 'em retry
+				System.out.println("\nPlease enter a valid Group ID.\n");
+			}
+		}
+
+		// Check if the request was actually sent, print success/failure
+		if(requestNotSent){
+			System.out.println("Group Request was not sent.\n");
+		}
+		else{
+			System.out.println("Group Request sent successfully.\n");
+		}
+		//sc.close();
+		
+
 	}
 	
 	/** This method will list all of the requests (friend and group [if group creator])
