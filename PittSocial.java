@@ -898,6 +898,7 @@ public class PittSocial
 
 				System.out.println("\nOutstanding Friend and Group Requests:");
 				System.out.println("0: Deny all requests and return to main.");
+				System.out.println("1: Accept all requests.");
 				for(int i = 0; i < (groupSize + friendSize); i++){
 					if(i < groupSize){
 						// Get the request details to print
@@ -909,7 +910,7 @@ public class PittSocial
 						String requn = requser.get("name").toString();
 
 						// Print the request
-						System.out.println((i+1) + ": " + requn + " is requesting to join " + reqgn + ": " + reqmessage);
+						System.out.println((i+2) + ": " + requn + " is requesting to join " + reqgn + ": " + reqmessage);
 					}
 					else{
 						// Get the request details to print
@@ -917,7 +918,7 @@ public class PittSocial
 						String reqmessage = userrequest.get("message").toString();
 						HashMap<String, Object> requser = getUserInfo((int)userrequest.get("fromid"));
 						String requn = requser.get("name").toString();
-						System.out.println((i+1) + ": " + requn + " wants to be your friend: " + reqmessage);
+						System.out.println((i+2) + ": " + requn + " wants to be your friend: " + reqmessage);
 					}
 				}
 				
@@ -930,11 +931,16 @@ public class PittSocial
 					sc.nextLine();
 
 					if(choice == 0){ // Deny all requests
-						System.out.println("Remaining requests denied... Returning to main menu...\n");
 						denyAllRequests(userID);
 						chooseMore = false;
-					}else if(choice <= groupSize){ // Accept a group join request
-						choice--;
+						System.out.println("Remaining requests denied... Returning to main menu...\n");
+					}else if(choice == 1){
+						acceptAllRequests(userID);
+						chooseMore = false;
+						System.out.println("Remaining requests accepted... Returning to main menu...\n");
+					}
+					else if(choice <= groupSize){ // Accept a group join request
+						choice-=2;
 						HashMap<String, Object> grouprequest = groupReqs.get(choice);
 						int gID = (int)grouprequest.get("gid");
 						int userID = (int)grouprequest.get("userid");
@@ -945,7 +951,7 @@ public class PittSocial
 							System.out.println("\nAccepting group join request failed.\n");
 						}
 					}else if(choice <= (groupSize + friendSize)){
-						choice -= (groupSize + 1);
+						choice -= (groupSize + 2);
 						HashMap<String, Object> userrequest = friendReqs.get(choice);
 						int toID = userID;
 						int fromID = (int)userrequest.get("fromid");
@@ -1055,6 +1061,42 @@ public class PittSocial
 		}catch(Exception e){
 			System.out.println(e.getMessage());
 			return false;
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private static void acceptAllRequests(int UID)
+	{
+		// First, get and accept all friend requests
+		try{
+			for(HashMap<String, Object> friendreq : getFriendRequests(UID)){
+				int fromID = (int)friendreq.get("fromid");
+				String message = friendreq.get("message").toString();
+				boolean success = confirmFriend(UID, fromID, message);
+				if(success){
+					System.out.println("Successfully accepted friend request from " + getUserInfo(fromID).get("name").toString());
+				}else{
+					System.out.println("Failed to accept friend request from " + getUserInfo(fromID).get("name").toString());
+				}
+			}
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+		}
+
+		// Then, get and accept all group requests
+		try{
+			for(HashMap<String, Object> groupreq : getGroupRequests(UID)){
+				int gid = (int)groupreq.get("gid");
+				int uid = (int)groupreq.get("userid");
+				boolean success = confirmGroupMember(gid, uid);
+				if(success){
+					System.out.println("Successfully accepted group join request from " + getUserInfo(uid).get("name").toString());
+				}else{
+					System.out.println("Failed to accept group join request from " + getUserInfo(uid).get("name").toString());
+				}
+			}
+		}catch(Exception e){
+			System.out.println(e.getMessage());
 		}
 	}
 
