@@ -154,7 +154,7 @@ public class PittSocial
 				}
 				else
 				{
-					System.out.println("Username + Password combination does not exist...");
+					System.out.println("Username + Password combination does not exist...\n");
 					System.out.println("Would you like to: ");
 					System.out.println("1: Try Again");
 					System.out.println("2: Go Back to Main Page");
@@ -851,7 +851,7 @@ public class PittSocial
 						String reqmessage = userrequest.get("message").toString();
 						HashMap<String, Object> requser = getUserInfo((int)userrequest.get("fromid"));
 						String requn = requser.get("name").toString();
-						System.out.println((i+1) + ". " + requn + " wants to be your friend: " + reqmessage);
+						System.out.println((i+1) + ": " + requn + " wants to be your friend: " + reqmessage);
 					}
 				}
 				
@@ -886,9 +886,9 @@ public class PittSocial
 						String message = userrequest.get("message").toString();
 						boolean successful = confirmFriend(toID, fromID, message);
 						if(successful){
-							System.out.println("\nSuccessfully added friend.\n");
+							System.out.println("\nSuccessfully added friend.");
 						}else{
-							System.out.println("\nAccepting friend request failed.\n");
+							System.out.println("\nAccepting friend request failed.");
 						}
 					}
 				}
@@ -1780,49 +1780,52 @@ public class PittSocial
 		int numMessages = 0;
 		Scanner sc = new Scanner(System.in);
 		Timestamp xTime = new Timestamp(System.currentTimeMillis());
-		System.out.println("Please enter the amount of top users you wish to see :");
-		int k = sc.nextInt();
-		sc.nextLine();
-		System.out.println("Please enter how many months back you wish to search in your messages you wish to see :");
-		int x = sc.nextInt();
-		sc.nextLine();
+		System.out.print("Please enter the amount of top users you wish to see: ");
+		String kk = sc.nextLine();
+		System.out.print("Please enter how many months back you wish to search in your messages you wish to see: ");
+		String xx = sc.nextLine();
 		int pos = 1;
 
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(xTime.getTime());
-		cal.add(Calendar.MONTH, -(x));
-		xTime = new Timestamp(cal.getTime().getTime());
-
-		System.out.println("Here is the current time minus x months" + xTime);
-
-		String SQL = "SELECT fromid, count(fromid) AS totalMessages FROM messageinfo WHERE touserid=? AND timesent>? GROUP BY fromid ORDER BY totalMessages DESC LIMIT ?";
-
-		try{
-			Connection conn = connect();
-			PreparedStatement pstmt = conn.prepareStatement(SQL);
-			pstmt.setInt(1, userID);
-			pstmt.setTimestamp(2, xTime);
-			pstmt.setInt(3, k);
-			ResultSet rs = pstmt.executeQuery();
-
-			while(rs.next())
-				{
-					tempUser = getUserName(rs.getInt("fromid"));
-					numMessages = rs.getInt("totalMessages");
-					System.out.println("Positsion " + pos + " : "+ tempUser +" with "+ numMessages +" messages. \n \n");
-					pos++;
-				}
-				System.out.println(" ---------------------------------- \n");
-		}
-		catch(Exception e)
+		try
 		{
-			e.printStackTrace();
-			System.out.println("Could not get top messages in system ");
+			int x = Integer.parseInt(xx);
+			int k = Integer.parseInt(kk);
+			Calendar cal = Calendar.getInstance();
+			cal.setTimeInMillis(xTime.getTime());
+			cal.add(Calendar.MONTH, -(x));
+			xTime = new Timestamp(cal.getTime().getTime());
+	
+			System.out.println("\nHere is the current time minus " + x + " months: " + xTime);
+	
+			String SQL = "SELECT fromid, count(fromid) AS totalMessages FROM messageinfo WHERE touserid=? AND timesent>? GROUP BY fromid ORDER BY totalMessages DESC LIMIT ?";
+	
+			try{
+				Connection conn = connect();
+				PreparedStatement pstmt = conn.prepareStatement(SQL);
+				pstmt.setInt(1, userID);
+				pstmt.setTimestamp(2, xTime);
+				pstmt.setInt(3, k);
+				ResultSet rs = pstmt.executeQuery();
+	
+				while(rs.next())
+					{
+						tempUser = getUserName(rs.getInt("fromid"));
+						numMessages = rs.getInt("totalMessages");
+						System.out.println("Position " + pos + " : "+ tempUser +" with "+ numMessages +" messages.");
+						pos++;
+					}
+					System.out.println("");
+			}
+			catch(Exception e)
+			{
+				e.printStackTrace();
+				System.out.println("Could not get top messages in system ");
+			}
 		}
-
-
-
-		
+		catch(Exception l)
+		{
+			System.out.println("Please input numbers only!\n");
+		}
 	}
 
 
