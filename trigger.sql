@@ -287,8 +287,8 @@ CREATE OR REPLACE FUNCTION removeUserFromGroups()
 $$
 BEGIN
     DELETE FROM groupMember gm
-    WHERE NEW.userID=gm.userID;
-    RETURN NEW;
+    WHERE OLD.userID=gm.userID;
+    RETURN OLD;
 END;
 $$ LANGUAGE 'plpgsql';
 
@@ -307,8 +307,8 @@ CREATE OR REPLACE FUNCTION removeUserFromMessages()
 $$
 BEGIN
     DELETE FROM messageInfo mi
-    WHERE NEW.userID=mi.fromID or NEW.userID=mi.toUserID;
-    RETURN NEW;
+    WHERE OLD.userID=mi.fromID or OLD.userID=mi.toUserID;
+    RETURN OLD;
 END;
 $$ LANGUAGE 'plpgsql';
 
@@ -328,8 +328,8 @@ CREATE OR REPLACE FUNCTION removeUserFromMessageRecipient()
 $$
 BEGIN
     DELETE FROM messageRecipient mr
-    WHERE NEW.userID=mr.userID;
-    RETURN NEW;
+    WHERE OLD.userID=mr.userID;
+    RETURN OLD;
 END;
 $$ LANGUAGE 'plpgsql';
 
@@ -343,3 +343,43 @@ CREATE TRIGGER user_remove_from_message_recipient
 -- TRIGGER 14: [TODO]
 -- When a User sends a friend request to themself, deny it.
 -- ASSUMPTION: A user can't be friends with themselves.
+CREATE OR REPLACE FUNCTION cant_friend_yourself()
+    RETURNS trigger AS
+$$
+BEGIN
+    IF NEW.fromID=NEW.toID THEN
+        RAISE EXCEPTION 'cannot friend yourself';
+        return null;
+    ELSE
+        return new;
+    end if;
+END;
+$$ LANGUAGE 'plpgsql';
+
+DROP TRIGGER IF EXISTS pendingFriend_yourself on pendingFriend;
+CREATE TRIGGER pendingFriend_yourself
+    BEFORE INSERT
+    ON pendingFriend
+    FOR EACH ROW
+    EXECUTE PROCEDURE cant_friend_yourself();
+
+
+-- TRIGGER 15: [Doing...Done]
+-- When  a User is deleted, delete their friend entries in the friend table
+-- ASSUMPTION: Can't be friends with someone if they don't exist
+CREATE OR REPLACE FUNCTION removeUserFromFriends()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    DELETE FROM friend fr
+    WHERE OLD.userID=fr.userID1 or OLD.userID=fr.userID2;
+    RETURN OLD;
+END;
+$$ LANGUAGE 'plpgsql';
+
+DROP TRIGGER IF EXISTS user_remove_from_friends on profile;
+CREATE TRIGGER user_remove_from_friends
+    BEFORE DELETE
+    ON profile
+    FOR EACH ROW
+    EXECUTE PROCEDURE removeUserFromFriends();

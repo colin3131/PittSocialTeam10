@@ -1704,7 +1704,10 @@ public class PittSocial
 					try{
 						ArrayList<Integer> shortestpath = new ArrayList<Integer>();
 						shortestpath.add(0, userID);
+						boolean found=false;
+						boolean found2=false;
 						if(getFriendIDs(userID).contains(checkid)){
+							found=true;
 						}
 						else{
 							for(int friend1 : getFriendIDs(userID)){
@@ -1713,23 +1716,26 @@ public class PittSocial
 										shortestpath.remove(1);
 										shortestpath.remove(1);
 									}catch(Exception e){}
+									found = true;
 									shortestpath.add(1, friend1);
 									break;
 								}
-								else{
+								else if(!found2){
 									for(int friend2 : getFriendIDs(friend1)){
-										if(getFriendIDs(friend2).contains(checkid) && shortestpath.size() != 3){
+										if(getFriendIDs(friend2).contains(checkid) && shortestpath.size() == 1){
 											shortestpath.add(1, friend1);
 											shortestpath.add(2, friend2);
+											found=true;
+											found2=true;
 											break;
 										}
 									}
 								}
 							}
-							shortestpath.add(checkid);
 						}
 
-						if(shortestpath.contains(checkid)){
+						if(found){
+							shortestpath.add(checkid);
 							System.out.println("\nPath was found between users " + userID + " and " + checkid + ":\n");
 							for(int friend : shortestpath){
 								if(friend != checkid){
@@ -1820,7 +1826,21 @@ public class PittSocial
 	 */
 	private static void dropUser()
 	{
+		System.out.println("\nRemoving this user from the system...");
+
+		try{
+			String SQL = "DELETE FROM profile WHERE userid=?";
+			Connection conn = connect();
+            PreparedStatement pstmt = conn.prepareStatement(SQL);
 		
+			pstmt.setInt(1, userID);
+			pstmt.executeUpdate();
+			System.out.println("\nRemoval successful.\n");
+			login = false;
+		}catch(Exception e){
+			System.out.println(e.getMessage());
+			System.out.println("Removal failed.");
+		}
 	}
 	
 	/** This method will exit the application and display
