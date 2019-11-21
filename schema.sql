@@ -87,7 +87,7 @@ create table messageRecipient
 );
 
 create table groupMember
-(   -- Assumes all must be entered by the user (not null)
+(   -- Assumes all must be entered by the user (not null) 
     gID             integer NOT NULL,
     userID          integer NOT NULL,
     role            varchar(20) NOT NULL

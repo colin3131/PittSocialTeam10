@@ -1946,7 +1946,7 @@ public class PittSocial
 		login = false;
 	}
 	
-	/** This method will delete the current user from existence, afterwards 
+	/** This method will delete the current user from existence, afterwards  
 	 * sending you back to the start-up menu
 	 */
 	private static void dropUser()

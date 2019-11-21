@@ -118,7 +118,7 @@ CREATE TRIGGER pendingFriend_make_friends
     EXECUTE PROCEDURE makeFriend();
 --
 -- TRIGGER 5:
--- When a message is made to a user, add it to the messageRecipient table
+-- When a message is made to a user, add it to the messageRecipient table 
 -- ASSUMPTION: we want to automatically keep track of all message recipients when a message is inserted
 CREATE OR REPLACE FUNCTION addRecipient()
     RETURNS TRIGGER AS
