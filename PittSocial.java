@@ -1939,7 +1939,7 @@ public class PittSocial
 
 	
 	/** This method will log a user out, sending you back to the 
-	 * login screen
+	 * login screen 
 	 */
 	private static void logout()
 	{

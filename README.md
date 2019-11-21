@@ -1,5 +1,6 @@
-# PittSocialTeam10
+# PittSocial - Team10
 CS 1555 Fall 2019 Project - Team 10
+By Jonathan Zdobinski, Jake Diecidue, and Colin Spratt
 
 ## Compiling / Running Instructions
  - Open the Command Line
