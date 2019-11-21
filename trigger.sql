@@ -333,8 +333,8 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
-DROP TRIGGER IF EXISTS user_remove_from_message_recipient on profile;
-CREATE TRIGGER user_remove_from_message_recipient
+DROP TRIGGER IF EXISTS a_user_remove_from_message_recipient on profile;
+CREATE TRIGGER a_user_remove_from_message_recipient
     BEFORE DELETE
     ON profile
     FOR EACH ROW
@@ -367,7 +367,7 @@ CREATE TRIGGER pendingFriend_yourself
 -- TRIGGER 15: [Doing...Done]
 -- When  a User is deleted, delete their friend entries in the friend table
 -- ASSUMPTION: Can't be friends with someone if they don't exist
-CREATE OR REPLACE FUNCTION removeUserFromFriends()
+CREATE OR REPLACE FUNCTION a_removeUserFromFriends()
     RETURNS TRIGGER AS
 $$
 BEGIN
@@ -377,9 +377,9 @@ BEGIN
 END;
 $$ LANGUAGE 'plpgsql';
 
-DROP TRIGGER IF EXISTS user_remove_from_friends on profile;
-CREATE TRIGGER user_remove_from_friends
+DROP TRIGGER IF EXISTS a_user_remove_from_friends on profile;
+CREATE TRIGGER a_user_remove_from_friends
     BEFORE DELETE
     ON profile
     FOR EACH ROW
-    EXECUTE PROCEDURE removeUserFromFriends();
+    EXECUTE PROCEDURE a_removeUserFromFriends();
