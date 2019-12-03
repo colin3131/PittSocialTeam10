@@ -1819,55 +1819,29 @@ public class PittSocial
 					loop = false;
 				}
 				else{
+					String SQL = "SELECT * FROM three_degrees(?, ?)";
 					try{
-						ArrayList<Integer> shortestpath = new ArrayList<Integer>();
-						shortestpath.add(0, userID);
-						boolean found=false;
-						boolean found2=false;
-						if(getFriendIDs(userID).contains(checkid)){
-							found=true;
-						}
-						else{
-							for(int friend1 : getFriendIDs(userID)){
-								if(getFriendIDs(friend1).contains(checkid)){
-									try{
-										shortestpath.remove(1);
-										shortestpath.remove(1);
-									}catch(Exception e){}
-									found = true;
-									shortestpath.add(1, friend1);
-									break;
-								}
-								else if(!found2){
-									for(int friend2 : getFriendIDs(friend1)){
-										if(getFriendIDs(friend2).contains(checkid) && shortestpath.size() == 1){
-											shortestpath.add(1, friend1);
-											shortestpath.add(2, friend2);
-											found=true;
-											found2=true;
-											break;
-										}
-									}
-								}
-							}
-						}
+						Connection conn = connect();
+						PreparedStatement pstmt = conn.prepareStatement(SQL);
+						pstmt.setInt(1, userID);
+						pstmt.setInt(2, checkid);
+						ResultSet rs = pstmt.executeQuery();
 
-						if(found){
-							shortestpath.add(checkid);
-							System.out.println("\nPath was found between users " + userID + " and " + checkid + ":\n");
-							for(int friend : shortestpath){
-								if(friend != checkid){
-									System.out.print(friend + " > ");
-								}else{
-									System.out.print(friend + "\n\n");
-								}
+						while(rs.next()){
+							Array p = rs.getArray(1);
+							Integer[] path = (Integer[])p.getArray();
+							System.out.println("\nPath Found");
+							System.out.println("----------");
+							for(Integer id : path){
+								if(id != null)
+									System.out.print(" -> " + id);
 							}
-						}else{
-							System.out.println("\nNo path of 3 hops was found between users " + userID + " and " + checkid + ".\n");
+							System.out.println("\n");
 						}
 					}catch(Exception e){
-						e.printStackTrace();
-						System.out.println("Path find failed.");
+						System.out.println();
+						System.out.println(e.getMessage());
+						System.out.println();
 					}
 				}
 			}

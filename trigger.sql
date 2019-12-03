@@ -383,3 +383,114 @@ CREATE TRIGGER a_user_remove_from_friends
     ON profile
     FOR EACH ROW
     EXECUTE PROCEDURE a_removeUserFromFriends();
+
+-- FUNCTION 1: ThreeDegrees
+-- When passed 2 users, finds the shortest path within 3 jumps between the users
+
+CREATE OR REPLACE FUNCTION three_degrees(fromid int, toid int)
+    RETURNS int[] AS
+$$
+DECLARE
+    friendpath int[];
+    pathlength int := 4;
+    cursor1 CURSOR(nextid int)
+        FOR SELECT userid1, userid2
+        FROM friend
+        WHERE userid1 = nextid
+           OR userid2 = nextid;
+    cursor2 CURSOR(nextid int)
+        FOR SELECT userid1, userid2
+        FROM friend
+        WHERE userid1 = nextid
+           OR userid2 = nextid;
+    cursor3 CURSOR(nextid int)
+        FOR SELECT userid1, userid2
+        FROM friend
+        WHERE userid1 = nextid
+           OR userid2 = nextid;
+    friend1rec RECORD;
+    friend2rec RECORD;
+    friend3rec RECORD;
+    check1 int;
+    check2 int;
+    check3 int;
+BEGIN
+    -- First, query for the fromid
+    OPEN cursor1(fromid);
+    LOOP
+        -- Grab the 1st friend
+        FETCH cursor1 into friend1rec;
+        EXIT WHEN friend1rec IS NULL;
+        if friend1rec.userid2 = fromid THEN
+            check1 := friend1rec.userid1;
+        else
+            check1 := friend1rec.userid2;
+        end if;
+        
+        -- Check if 1st friend is correct
+        IF check1 = toid THEN
+            friendpath[1] := fromid;
+            friendpath[2] := toid;
+            friendpath[3] := NULL;
+            friendpath[4] := NULL;
+            pathlength := 1;
+            EXIT;
+        ELSE
+            -- Grab the 2nd friend
+            OPEN cursor2(check1);
+            LOOP
+                FETCH cursor2 into friend2rec;
+                EXIT WHEN friend2rec IS NULL;
+                if friend2rec.userid2 = check1 THEN
+                    check2 := friend2rec.userid1;
+                else
+                    check2 := friend2rec.userid2;
+                end if;
+
+                -- Check if 2nd friend is correct
+                IF check2 = toid
+                AND pathlength > 2 THEN
+                    friendpath[1] := fromid;
+                    friendpath[2] := check1;
+                    friendpath[3] := toid;
+                    friendpath[4] := NULL;
+                    pathlength := 2;
+                    EXIT;
+                ELSE
+                    -- Grab the 3rd Friend
+                    OPEN cursor3(check2);
+                    LOOP
+                        FETCH cursor3 into friend3rec;
+                        EXIT WHEN friend3rec IS NULL;
+                        if friend3rec.userid2 = check2 THEN
+                            check3 := friend3rec.userid1;
+                        else
+                            check3 := friend3rec.userid2;
+                        end if;
+
+                        -- Check if 3rd friend is correct
+                        IF check3 = toid
+                        AND pathlength > 3 THEN
+                            friendpath[1] := fromid;
+                            friendpath[2] := check1;
+                            friendpath[3] := check2;
+                            friendpath[4] := toid;
+                            pathlength := 3;
+                            EXIT;
+                        end if;
+                    end loop;
+                    CLOSE cursor3;
+                end if;
+            end loop;
+            CLOSE cursor2;
+        end if;
+    end loop;
+    CLOSE cursor1;
+
+    -- Raise Exception if not found
+    if pathlength=4 THEN
+        RAISE EXCEPTION 'No Path to user %', toid;
+    end if;
+    return friendpath;
+end;
+$$ LANGUAGE 'plpgsql';
