@@ -142,7 +142,7 @@ public class PittSocial
 				System.out.print("Please enter your password: ");
 				String input2 = kbd2.nextLine();
 				
-				boolean userExists = loginRequest(input1, input2);
+				boolean userExists = login(input1, input2);
 				//userExists = true; // Testing phase so we can get into the server
 				if(userExists)
 				{
@@ -427,7 +427,7 @@ public class PittSocial
 	 * @param password - the password of the user
 	 * @return boolean - true if logged in false otherwise
 	 */
-	private static boolean loginRequest(String email, String password)
+	private static boolean login(String email, String password)
 	{
 		boolean exists = false;
 		String SQL = "SELECT userid, email, password FROM profile";
