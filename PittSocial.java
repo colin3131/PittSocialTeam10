@@ -1254,36 +1254,61 @@ public class PittSocial
 		
 		if(valid)
 		{
-			System.out.print("Please enter the message to send: ");
-			String message = SMTUkbd.nextLine();
-			boolean continueMessage = true;
-			while(continueMessage)
+			// Check to make sure the user is a friend
+			try 
 			{
-				System.out.println("Continue typing message? [Yes/No]");
-				String answer = SMTUkbd.nextLine();
-				if(answer.equals("Yes"))
+				boolean areFriends = false;
+				ArrayList<Integer> friends = getFriendIDs(userID);
+				for(int y = 0; y < friends.size(); y++)
 				{
-					System.out.println("Please enter the next part of the message: ");
-					String input = SMTUkbd.nextLine();
-					message = message.concat(" ");
-					message = message.concat(input);
+					if(UIDtosend == friends.get(y))
+					{
+						areFriends = true;
+					}
+				}
+				
+				if(areFriends)
+				{
+					System.out.print("Please enter the message to send: ");
+					String message = SMTUkbd.nextLine();
+					boolean continueMessage = true;
+					while(continueMessage)
+					{
+						System.out.println("Continue typing message? [Yes/No]");
+						String answer = SMTUkbd.nextLine();
+						if(answer.equals("Yes"))
+						{
+							System.out.println("Please enter the next part of the message: ");
+							String input = SMTUkbd.nextLine();
+							message = message.concat(" ");
+							message = message.concat(input);
+						}
+						else
+						{
+							continueMessage = false;
+						}
+					}
+					
+					System.out.println("Your message is as follows: " + message);
+					System.out.print("Do you want to send this message [Yes/No]?: ");
+					String input2 = SMTUkbd.nextLine();
+					if(input2.equals("Yes"))
+					{
+						sendMessageToUserSub(UIDtosend, message);
+					}
+					else
+					{
+						System.out.println("You canceled the message.");
+					}
 				}
 				else
 				{
-					continueMessage = false;
+					System.out.println("User Is Not Your Friend [Message Canceled]");
 				}
-			}
-			
-			System.out.println("Your message is as follows: " + message);
-			System.out.print("Do you want to send this message [Yes/No]?: ");
-			String input2 = SMTUkbd.nextLine();
-			if(input2.equals("Yes"))
+			} 
+			catch (Exception e) 
 			{
-				sendMessageToUserSub(UIDtosend, message);
-			}
-			else
-			{
-				System.out.println("You canceled the message.");
+				System.out.println("Retrieving Friends Failed");
 			}
 		}
 		System.out.println("");
