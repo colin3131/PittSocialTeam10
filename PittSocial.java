@@ -1791,20 +1791,22 @@ public class PittSocial
 	
 		System.out.print("Enter a username [first last] that you want to check the system if they are a user: ");
 		tempuser = sc.nextLine();
-		String SQL = "SELECT name FROM profile";
+		String SQL = "SELECT name FROM profile WHERE name = ?";
 
-		try (Connection conn = connect();
-                Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery(SQL)) 
-		{
+		try {
+
+			Connection conn = connect();
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			pstmt.setString(1, tempuser);
+		
+			ResultSet rs = pstmt.executeQuery();
 			while(rs.next())
 				{
 						tempuserCheck = rs.getString("name");
 						if(tempuser.equals(tempuserCheck)){
 							founduser = true;
 						}
-						
-				}
+				} 
 
 				if(founduser){
 					System.out.println("User is our system. Try adding them as a friend! \n");
