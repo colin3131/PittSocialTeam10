@@ -939,18 +939,18 @@ public class PittSocial
 						chooseMore = false;
 						System.out.println("Remaining requests accepted... Returning to main menu...\n");
 					}
-					else if(choice <= groupSize){ // Accept a group join request
+					else if(choice-1 <= groupSize){ // Accept a group join request
 						choice-=2;
 						HashMap<String, Object> grouprequest = groupReqs.get(choice);
 						int gID = (int)grouprequest.get("gid");
 						int userID = (int)grouprequest.get("userid");
 						boolean successful = confirmGroupMember(gID, userID);
 						if(successful){
-							System.out.println("\nSuccessfully added user to group.\n");
+							System.out.println("\nSuccessfully added user to group.");
 						}else{
-							System.out.println("\nAccepting group join request failed.\n");
+							System.out.println("\nAccepting group join request failed.");
 						}
-					}else if(choice <= (groupSize + friendSize)){
+					}else if(choice-1 <= (groupSize + friendSize)){
 						choice -= (groupSize + 2);
 						HashMap<String, Object> userrequest = friendReqs.get(choice);
 						int toID = userID;
@@ -962,6 +962,10 @@ public class PittSocial
 						}else{
 							System.out.println("\nAccepting friend request failed.");
 						}
+					}
+					else
+					{
+						System.out.println("Invalid Number Selected");
 					}
 				}
 			}
