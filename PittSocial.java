@@ -1789,8 +1789,11 @@ public class PittSocial
 		String tempuserCheck = "";
 		Scanner sc = new Scanner(System.in);
 	
-		System.out.print("Enter a username [first last] that you want to check the system if they are a user: ");
+		System.out.print("Enter what you want to search a profile for ");
 		tempuser = sc.nextLine();
+		String[] split = tempuser.split(" ");
+		
+
 		String SQL = "SELECT name FROM profile WHERE name = ?";
 
 		try {

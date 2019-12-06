@@ -494,3 +494,9 @@ BEGIN
     return friendpath;
 end;
 $$ LANGUAGE 'plpgsql';
+
+-- search user function 
+-- CREATE OR REPLACE FUNCTION search_string(fromid int, toid int)
+--     RETURNS string[] AS
+-- $$
+-- DECLARE
