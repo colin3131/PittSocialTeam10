@@ -1781,7 +1781,7 @@ public class PittSocial
 						if(tempuser.equals(tempuserCheck)){
 							founduser = true;
 						}
-				}
+				} 
 
 				if(founduser){
 					System.out.println("User is our system. Try adding them as a friend! \n");
