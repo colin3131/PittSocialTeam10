@@ -1792,17 +1792,31 @@ public class PittSocial
 		System.out.print("Enter what you want to search a profile for ");
 		tempuser = sc.nextLine();
 		String[] split = tempuser.split(" ");
+
+
+		String SQL = "SELECT name FROM profile WHERE name LIKE "+ split[0] +" OR email LIKE "+ split[0] +" ";
+		for(int i = 1; i < split.length; i++){
+			SQL = SQL + " OR name LIKE "+ split[i] +" or email LIKE "+ split[i] +"";
+		}
+		System.out.println(SQL);
 		
 
-		String SQL = "SELECT name FROM profile WHERE name = ?";
-
-		try {
-
+		try(
 			Connection conn = connect();
-			PreparedStatement pstmt = conn.prepareStatement(SQL);
-			pstmt.setString(1, tempuser);
+			Statement stmt = conn.createStatement();
+			ResultSet rs = stmt.executeQuery(SQL)) {
+
+			// Connection conn = connect();
+			// PreparedStatement pstmt = conn.prepareStatement(SQL);
+			// for(int i = 0; i < (split.length * 2); i += 2){
+			// 	pstmt.setString((i + 1), split[i]);
+			// 	pstmt.setString((i + 2), split[i]);
+			// }
+
+			// System.out.println(SQL);
+			// System.out.println(pstmt);
 		
-			ResultSet rs = pstmt.executeQuery();
+			// ResultSet rs = pstmt.executeQuery();
 			while(rs.next())
 				{
 						tempuserCheck = rs.getString("name");
@@ -1817,7 +1831,7 @@ public class PittSocial
 				else{
 					System.out.println("User is not in the system. Tell them to make an account. \n");
 				}
-				//System.out.println(" ---------------------------------- \n");
+				System.out.println(" ---------------------------------- \n");
 		}
 		catch(Exception l)
 		{

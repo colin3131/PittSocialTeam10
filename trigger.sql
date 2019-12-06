@@ -495,8 +495,32 @@ BEGIN
 end;
 $$ LANGUAGE 'plpgsql';
 
+
 -- search user function 
--- CREATE OR REPLACE FUNCTION search_string(fromid int, toid int)
---     RETURNS string[] AS
--- $$
--- DECLARE
+create or replace type string_array as table of VARCHAR(100);
+
+CREATE OR REPLACE FUNCTION search_user (temp_array in string_array) 
+   RETURNS TABLE (
+      profile_name VARCHAR,
+      profile_email VARCHAR
+    ) 
+    AS $$
+    DECLARE
+        s VARCHAR;
+        i int;
+    BEGIN
+        RETURN QUERY SELECT
+            name,email 
+        FROM
+            profile
+        WHERE EXISTS (
+            i := temp_array.first();
+            SELECT * FROM profile where name LIKE '%' || temp_array(i) || '%' or email LIKE '%' || temp_array(i) || '%'
+            i := temp_array.next(i);
+            while i is not null loop
+                union (SELECT * FROM profile WHERE name LIKE '%' || temp_array(i) || '%' or email LIKE '%' || temp_array(i) || '%')
+            i := temp_array.next(i);
+            end loop;
+        );
+    END; 
+ $$ LANGUAGE 'plpgsql';
