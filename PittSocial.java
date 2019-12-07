@@ -1611,13 +1611,40 @@ public class PittSocial
 				tempmessage = rs.getString("message");
 				System.out.println(tempmessage + "\n");
 			}
-			System.out.println(" ----------------------------------- \n");
 		}
 		catch(Exception e)
 		{
 			System.out.println(e.getMessage());
 			System.out.println("Getting your messages failed try again later");
 		}
+		
+		// Now Group Messages
+		SQL = "SELECT message,fromid,togroupid FROM messageinfo WHERE touserid is NULL";
+		int group = 0;
+		
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			while(rs.next())
+			{
+				group = rs.getInt("togroupid");
+				if(userInGroup(group, userID))
+				{
+					fromId = rs.getInt("fromid");
+					fromUser = getUserName(fromId);
+					System.out.println("Message from " + fromUser + " in Group " + group + ": ");
+					tempmessage = rs.getString("message");
+					System.out.println(tempmessage + "\n");
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+			System.out.println("Getting your messages failed try again later");
+		}
+		System.out.println(" ----------------------------------- \n");
 		
 	}
 	
