@@ -1794,34 +1794,40 @@ public class PittSocial
 		String tempuser = "";
 		boolean founduser = false;
 		String tempuserCheck = "";
+		String tempEmail ="";
 		Scanner sc = new Scanner(System.in);
 	
-		System.out.print("Enter a username [first last] that you want to check the system if they are a user: ");
+		System.out.print("Enter what you want to search a profile for ");
 		tempuser = sc.nextLine();
-		String SQL = "SELECT name FROM profile WHERE name = ?";
+		tempuser = "%" + tempuser + "%";
+		String[] split = tempuser.split(" ");
+		ArrayList<String> list = new ArrayList<String>();
+		for(int i=0; i < split.length; i++){
+			list.add(split[i]);
+		}
 
+
+
+		String SQL = "SELECT DISTINCT username,useremail FROM search_user(?)";
 		try {
 
 			Connection conn = connect();
 			PreparedStatement pstmt = conn.prepareStatement(SQL);
-			pstmt.setString(1, tempuser);
+			Array array = conn.createArrayOf("TEXT", list.toArray());
+			pstmt.setArray(1, array);
 		
 			ResultSet rs = pstmt.executeQuery();
+			System.out.print("List of Users found in our system related to search ------------------ \n\n");
 			while(rs.next())
-				{
-						tempuserCheck = rs.getString("name");
-						if(tempuser.equals(tempuserCheck)){
-							founduser = true;
-						}
+				{	
+					
+					tempuserCheck = rs.getString("username");
+					tempEmail = rs.getString("useremail");
+					System.out.print("User : "+ tempuserCheck + " - Email : " + tempEmail +"\n");
+						
 				} 
 
-				if(founduser){
-					System.out.println("User is our system. Try adding them as a friend! \n");
-				}
-				else{
-					System.out.println("User is not in the system. Tell them to make an account. \n");
-				}
-				//System.out.println(" ---------------------------------- \n");
+				System.out.println(" ---------------------------------- \n");
 		}
 		catch(Exception l)
 		{
