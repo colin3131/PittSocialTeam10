@@ -494,3 +494,26 @@ BEGIN
     return friendpath;
 end;
 $$ LANGUAGE 'plpgsql';
+
+
+-- search user function 
+CREATE OR REPLACE FUNCTION search_user (strings text[])
+   RETURNS TABLE (
+        username VARCHAR,
+        useremail VARCHAR
+    )
+    AS $$
+    DECLARE
+        str text := 'test';
+        i int := 1;
+    BEGIN
+        str := strings[i];
+        WHILE str is not NULL
+        LOOP
+            str := strings[i];
+            RETURN QUERY SELECT name as username,email as useremail FROM profile where name LIKE '%' || strings[i] || '%' or email LIKE '%' || strings[i] || '%';
+            i := i + 1;
+        end loop;
+        RETURN;
+    END;
+ $$ LANGUAGE 'plpgsql'
