@@ -63,7 +63,7 @@ create table groupInfo
 create table messageInfo
 (   -- Assumes msgID, fromID, message, and timeSent must be entered by the user (not null)
     msgID           integer NOT NULL,
-    fromID          integer NOT NULL,
+    fromID          integer,
     message         varchar(200) NOT NULL,
     toUserID        integer DEFAULT NULL,
     toGroupID       integer DEFAULT NULL,

@@ -299,15 +299,39 @@ CREATE TRIGGER user_remove_from_groups
     FOR EACH ROW
     EXECUTE PROCEDURE removeUserFromGroups();
 
--- TRIGGER 12: [In progress]
+-- TRIGGER 12: [Finished]
 -- When a User is deleted, delete all messages where the from and to users are deleted.
 -- ASSUMPTION: If neither user is on the system anymore, no one can view the messages, so they should be removed.
 CREATE OR REPLACE FUNCTION removeUserFromMessages()
     RETURNS TRIGGER AS
 $$
+DECLARE
+    -- Grab all of the message ids where it's from the user, to the user, or to the user's group
+    cur_relatedmsg CURSOR(uid INTEGER) FOR
+                    SELECT msgid
+                    FROM messageinfo mi
+                    WHERE mi.fromid=uid
+                       OR mi.touserid=uid
+                       OR mi.togroupid in (
+                           SELECT gid
+                           FROM groupmember gm
+                           WHERE userid=uid
+                        );
+    rec_msg RECORD;
 BEGIN
-    DELETE FROM messageInfo mi
-    WHERE OLD.userID=mi.fromID or OLD.userID=mi.toUserID;
+    OPEN cur_relatedmsg(OLD.userid);
+    LOOP
+        FETCH cur_relatedmsg into rec_msg;
+        EXIT WHEN NOT FOUND;
+        IF NOT EXISTS(SELECT FROM messagerecipient mr
+                        WHERE mr.msgid = rec_msg.msgid) -- If there's no message recipients left
+                  AND(SELECT fromid FROM messageinfo mi -- and there's no sender left
+                        WHERE mi.msgid = rec_msg.msgid) IS NULL THEN
+            -- Then delete the message
+            DELETE FROM messageinfo mi WHERE mi.msgid=rec_msg.msgid;
+        end if;
+    end loop;
+    CLOSE cur_relatedmsg;
     RETURN OLD;
 END;
 $$ LANGUAGE 'plpgsql';
@@ -516,4 +540,5 @@ CREATE OR REPLACE FUNCTION search_user (strings text[])
         end loop;
         RETURN;
     END;
- $$ LANGUAGE 'plpgsql'
+ $$ LANGUAGE 'plpgsql';
+
