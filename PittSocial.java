@@ -181,7 +181,7 @@ public class PittSocial
 		else if(initialize.equals("2"))
 		{
 			Scanner kbd2 = new Scanner(System.in);
-			System.out.print("Please enter a username [first last]: ");
+			System.out.print("Please enter a username [Your Name]: ");
 			String usernameInput = kbd2.nextLine();
 			System.out.print("Please enter a password: ");
 			String password = kbd2.nextLine();
@@ -1964,6 +1964,7 @@ public class PittSocial
 	private static void logout()
 	{
 		login = false;
+		System.out.println("");
 	}
 	
 	/** This method will delete the current user from existence, afterwards  
