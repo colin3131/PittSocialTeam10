@@ -328,6 +328,20 @@ BEGIN
                         WHERE mi.msgid = rec_msg.msgid) IS NULL THEN
             -- Then delete the message
             DELETE FROM messageinfo mi WHERE mi.msgid=rec_msg.msgid;
+        ELSEIF EXISTS(SELECT FROM messageinfo mi
+                        WHERE mi.fromid=OLD.userid AND mi.msgid=rec_msg.msgid)THEN
+            UPDATE messageinfo SET fromid=null WHERE fromid=OLD.userid AND msgid=rec_msg.msgid;
+            IF NOT EXISTS(SELECT FROM messagerecipient mr
+                        WHERE mr.msgid = rec_msg.msgid) THEN
+                DELETE FROM messageinfo mi WHERE mi.msgid=rec_msg.msgid;
+            end if;
+        ELSEIF EXISTS(SELECT FROM messageinfo mi
+                        WHERE mi.touserid=OLD.userid AND mi.msgid=rec_msg.msgid)THEN
+            UPDATE messageinfo SET touserid=null WHERE touserid=OLD.userid AND msgid=rec_msg.msgid;
+            IF NOT EXISTS(SELECT FROM messagerecipient mr
+                        WHERE mr.msgid = rec_msg.msgid) THEN
+                DELETE FROM messageinfo mi WHERE mi.msgid=rec_msg.msgid;
+            end if;
         end if;
     end loop;
     CLOSE cur_relatedmsg;
