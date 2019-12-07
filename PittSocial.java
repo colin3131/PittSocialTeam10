@@ -1983,7 +1983,7 @@ public class PittSocial
 	
 			System.out.println("\nHere is the current time minus " + x + " months: " + xTime);
 	
-			String SQL = "SELECT profile, SUM(fromCount + toCount) AS messages FROM topK(?,?,?) GROUP BY profile";
+			String SQL = "SELECT profile, SUM(fromCount + toCount) AS messages FROM topK(?,?,?) GROUP BY profile ORDER BY messages DESC";
 	
 			try{
 				Connection conn = connect();
