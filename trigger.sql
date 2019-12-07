@@ -497,30 +497,32 @@ $$ LANGUAGE 'plpgsql';
 
 
 -- search user function 
-create or replace type string_array as table of VARCHAR(100);
-
-CREATE OR REPLACE FUNCTION search_user (temp_array in string_array) 
+CREATE OR REPLACE FUNCTION search_user (strings text[])
    RETURNS TABLE (
-      profile_name VARCHAR,
-      profile_email VARCHAR
-    ) 
+        username VARCHAR,
+        useremail VARCHAR
+    )
     AS $$
     DECLARE
-        s VARCHAR;
-        i int;
+        str text := 'test';
+        i int := 1;
+--         rec record;
+--         cur_prof cursor(sub text)
+--             for SELECT name as username,email as useremail FROM profile where name LIKE '%' || sub || '%' or email LIKE '%' || sub || '%';
     BEGIN
-        RETURN QUERY SELECT
-            name,email 
-        FROM
-            profile
-        WHERE EXISTS (
-            i := temp_array.first();
-            SELECT * FROM profile where name LIKE '%' || temp_array(i) || '%' or email LIKE '%' || temp_array(i) || '%'
-            i := temp_array.next(i);
-            while i is not null loop
-                union (SELECT * FROM profile WHERE name LIKE '%' || temp_array(i) || '%' or email LIKE '%' || temp_array(i) || '%')
-            i := temp_array.next(i);
-            end loop;
-        );
-    END; 
- $$ LANGUAGE 'plpgsql';
+        str := strings[i];
+        WHILE str is not NULL
+        LOOP
+        str := strings[i];
+--             OPEN cur_prof(strings[i]);
+--             LOOP
+--                 FETCH cur_prof into rec;
+--                 EXIT WHEN rec IS NULL;
+                RETURN QUERY SELECT name as username,email as useremail FROM profile where name LIKE '%' || strings[i] || '%' or email LIKE '%' || strings[i] || '%';
+--             END LOOP;
+--             close cur_prof;
+            i := i + 1;
+        end loop;
+        RETURN;
+    END;
+ $$ LANGUAGE 'plpgsql'

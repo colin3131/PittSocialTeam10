@@ -1787,50 +1787,39 @@ public class PittSocial
 		String tempuser = "";
 		boolean founduser = false;
 		String tempuserCheck = "";
+		String tempEmail ="";
 		Scanner sc = new Scanner(System.in);
 	
 		System.out.print("Enter what you want to search a profile for ");
 		tempuser = sc.nextLine();
+		tempuser = "%" + tempuser + "%";
 		String[] split = tempuser.split(" ");
-
-
-		String SQL = "SELECT name FROM profile WHERE name LIKE "+ split[0] +" OR email LIKE "+ split[0] +" ";
-		for(int i = 1; i < split.length; i++){
-			SQL = SQL + " OR name LIKE "+ split[i] +" or email LIKE "+ split[i] +"";
+		ArrayList<String> list = new ArrayList<String>();
+		for(int i=0; i < split.length; i++){
+			list.add(split[i]);
 		}
-		System.out.println(SQL);
-		
 
-		try(
+
+
+		String SQL = "SELECT DISTINCT username,useremail FROM search_user(?)";
+		try {
+
 			Connection conn = connect();
-			Statement stmt = conn.createStatement();
-			ResultSet rs = stmt.executeQuery(SQL)) {
-
-			// Connection conn = connect();
-			// PreparedStatement pstmt = conn.prepareStatement(SQL);
-			// for(int i = 0; i < (split.length * 2); i += 2){
-			// 	pstmt.setString((i + 1), split[i]);
-			// 	pstmt.setString((i + 2), split[i]);
-			// }
-
-			// System.out.println(SQL);
-			// System.out.println(pstmt);
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			Array array = conn.createArrayOf("TEXT", list.toArray());
+			pstmt.setArray(1, array);
 		
-			// ResultSet rs = pstmt.executeQuery();
+			ResultSet rs = pstmt.executeQuery();
+			System.out.print("List of Users found in our system related to search ------------------ \n\n");
 			while(rs.next())
-				{
-						tempuserCheck = rs.getString("name");
-						if(tempuser.equals(tempuserCheck)){
-							founduser = true;
-						}
+				{	
+					
+					tempuserCheck = rs.getString("username");
+					tempEmail = rs.getString("useremail");
+					System.out.print("User : "+ tempuserCheck + " - Email : " + tempEmail +"\n");
+						
 				} 
 
-				if(founduser){
-					System.out.println("User is our system. Try adding them as a friend! \n");
-				}
-				else{
-					System.out.println("User is not in the system. Tell them to make an account. \n");
-				}
 				System.out.println(" ---------------------------------- \n");
 		}
 		catch(Exception l)
