@@ -13,7 +13,7 @@ create table profile
 (   -- Assumes all must be entered by the user (not null)
     userID          integer,
     name            varchar(50) NOT NULL
-        check (name LIKE '% %'),            -- Assumes they must enter a first and last name
+        check (name LIKE '%'),            -- Assumes they must enter a first and last name (now only first name 4 demo)
     email           varchar(50) NOT NULL
         check (email LIKE '%@%.___'),       -- Assumes they must enter an email with something@something.(3 extention)
     password        varchar(50) NOT NULL,
