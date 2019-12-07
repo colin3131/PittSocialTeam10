@@ -515,6 +515,7 @@ public class PittSocial
 			try (Connection conn = connect();
 	                PreparedStatement pstmt = conn.prepareStatement(SQL)) 
 			{
+				conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 				pstmt.setInt(1, UID);
 	            pstmt.setString(2, username);
 	            pstmt.setString(3, email);
@@ -598,6 +599,7 @@ public class PittSocial
 						try{
 							String SQL = "INSERT INTO pendingFriend VALUES(?, ?, ?)";
 							Connection conn = connect();
+							conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 							PreparedStatement pstmt = conn.prepareStatement(SQL);
 							pstmt.setInt(1, userID);
 							pstmt.setInt(2, toUserID);
@@ -939,18 +941,18 @@ public class PittSocial
 						chooseMore = false;
 						System.out.println("Remaining requests accepted... Returning to main menu...\n");
 					}
-					else if(choice <= groupSize){ // Accept a group join request
+					else if(choice-1 <= groupSize){ // Accept a group join request
 						choice-=2;
 						HashMap<String, Object> grouprequest = groupReqs.get(choice);
 						int gID = (int)grouprequest.get("gid");
 						int userID = (int)grouprequest.get("userid");
 						boolean successful = confirmGroupMember(gID, userID);
 						if(successful){
-							System.out.println("\nSuccessfully added user to group.\n");
+							System.out.println("\nSuccessfully added user to group.");
 						}else{
-							System.out.println("\nAccepting group join request failed.\n");
+							System.out.println("\nAccepting group join request failed.");
 						}
-					}else if(choice <= (groupSize + friendSize)){
+					}else if(choice-1 <= (groupSize + friendSize)){
 						choice -= (groupSize + 2);
 						HashMap<String, Object> userrequest = friendReqs.get(choice);
 						int toID = userID;
@@ -962,6 +964,10 @@ public class PittSocial
 						}else{
 							System.out.println("\nAccepting friend request failed.");
 						}
+					}
+					else
+					{
+						System.out.println("Invalid Number Selected");
 					}
 				}
 			}
@@ -1030,6 +1036,7 @@ public class PittSocial
 		String SQL = "INSERT INTO groupmember(gid, userid, role) " + "VALUES(?, ?, ?)";
 		try{
 			Connection conn = connect();
+			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 			PreparedStatement pstmt = conn.prepareStatement(SQL);
 			pstmt.setInt(1, gID);
 			pstmt.setInt(2, uid);
