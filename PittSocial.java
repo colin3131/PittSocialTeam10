@@ -515,6 +515,7 @@ public class PittSocial
 			try (Connection conn = connect();
 	                PreparedStatement pstmt = conn.prepareStatement(SQL)) 
 			{
+				conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 				pstmt.setInt(1, UID);
 	            pstmt.setString(2, username);
 	            pstmt.setString(3, email);
@@ -598,6 +599,7 @@ public class PittSocial
 						try{
 							String SQL = "INSERT INTO pendingFriend VALUES(?, ?, ?)";
 							Connection conn = connect();
+							conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 							PreparedStatement pstmt = conn.prepareStatement(SQL);
 							pstmt.setInt(1, userID);
 							pstmt.setInt(2, toUserID);
@@ -1034,6 +1036,7 @@ public class PittSocial
 		String SQL = "INSERT INTO groupmember(gid, userid, role) " + "VALUES(?, ?, ?)";
 		try{
 			Connection conn = connect();
+			conn.setTransactionIsolation(Connection.TRANSACTION_SERIALIZABLE);
 			PreparedStatement pstmt = conn.prepareStatement(SQL);
 			pstmt.setInt(1, gID);
 			pstmt.setInt(2, uid);
