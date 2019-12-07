@@ -1803,7 +1803,7 @@ public class PittSocial
 		String tempEmail ="";
 		Scanner sc = new Scanner(System.in);
 	
-		System.out.print("Enter what you want to search a profile for ");
+		System.out.print("Enter what you want to search a profile for: ");
 		tempuser = sc.nextLine();
 		tempuser = "%" + tempuser + "%";
 		String[] split = tempuser.split(" ");
@@ -1823,7 +1823,8 @@ public class PittSocial
 			pstmt.setArray(1, array);
 		
 			ResultSet rs = pstmt.executeQuery();
-			System.out.print("List of Users found in our system related to search ------------------ \n\n");
+			System.out.println("List of Users found in our system related to search");
+			System.out.println(" ---------------------------------- ");
 			while(rs.next())
 				{	
 					
