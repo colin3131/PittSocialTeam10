@@ -1670,7 +1670,7 @@ public class PittSocial
 			pstmt.setTimestamp(2, lastLogin);
 			ResultSet rs = pstmt.executeQuery();
 		
-			System.out.println("Hear are all of your messages since you last logged in \n ----------------------------------- \n");
+			System.out.println("Hear are all of your messages since you logged-in \n ----------------------------------- \n");
 			while(rs.next())
 			{
 				fromId = rs.getInt("fromid");
@@ -1679,7 +1679,6 @@ public class PittSocial
 				tempmessage = rs.getString("message");
 				System.out.println(tempmessage + "\n");
 			}
-			System.out.println(" ---------------------------------- \n");
 		}
 		catch(Exception e)
 		{
@@ -1687,6 +1686,37 @@ public class PittSocial
 			System.out.println("Failed getting new messages \n");
 			
 		}
+		
+		// Now Group Messages
+		SQL = "SELECT message,fromid,togroupid FROM messageinfo WHERE touserid is NULL AND timesent >=?";
+		int group = 0;
+		
+		try  
+		{
+			Connection conn = connect();
+			PreparedStatement pstmt = conn.prepareStatement(SQL);
+			pstmt.setTimestamp(1, lastLogin);
+			ResultSet rs = pstmt.executeQuery();
+			
+			while(rs.next())
+			{
+				group = rs.getInt("togroupid");
+				if(userInGroup(group, userID))
+				{
+					fromId = rs.getInt("fromid");
+					fromUser = getUserName(fromId);
+					System.out.println("Message from " + fromUser + " in Group " + group + ": ");
+					tempmessage = rs.getString("message");
+					System.out.println(tempmessage + "\n");
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+			System.out.println("Getting your messages failed try again later");
+		}
+		System.out.println(" ----------------------------------- \n");
 
 		
 	}
