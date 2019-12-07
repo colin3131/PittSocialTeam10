@@ -561,3 +561,19 @@ CREATE OR REPLACE FUNCTION search_user (strings text[])
     END;
  $$ LANGUAGE 'plpgsql';
 
+ --top k function 
+ CREATE OR REPLACE FUNCTION topK (prof int,x timestamp,k int)
+   RETURNS TABLE (
+        profile int,
+        fromCount bigint,
+        toCount bigint
+    )
+    AS $$
+    DECLARE
+    BEGIN
+        RETURN QUERY SELECT fromid as profile, count(fromid) AS fromCount, CAST(0 as bigint)  as toCount FROM messageinfo WHERE touserid=prof AND timesent>x GROUP BY fromid ORDER BY fromCount DESC LIMIT k;
+        RETURN QUERY SELECT touserid as profile, CAST(0 as bigint) as fromCount, count(touserid) AS toCount  FROM messageinfo WHERE fromid=prof AND timesent>x GROUP BY touserid ORDER BY toCount DESC LIMIT k;
+        RETURN;
+    END;
+ $$ LANGUAGE 'plpgsql';
+
