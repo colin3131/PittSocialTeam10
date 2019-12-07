@@ -407,6 +407,26 @@ CREATE TRIGGER a_user_remove_from_friends
     FOR EACH ROW
     EXECUTE PROCEDURE a_removeUserFromFriends();
 
+-- TRIGGER 16: [Doing...Done]
+-- When  a User is deleted, delete their pending friend entries in the pendingfriend table
+-- ASSUMPTION: Can't be friends with someone if they don't exist
+CREATE OR REPLACE FUNCTION a_removeUserFromPendingFriends()
+    RETURNS TRIGGER AS
+$$
+BEGIN
+    DELETE FROM pendingfriend fr
+    WHERE OLD.userID=fr.fromid or OLD.userID=fr.toid;
+    RETURN OLD;
+END;
+$$ LANGUAGE 'plpgsql';
+
+DROP TRIGGER IF EXISTS a_user_remove_from_pending_friends on profile;
+CREATE TRIGGER a_user_remove_from_pending_friends
+    BEFORE DELETE
+    ON profile
+    FOR EACH ROW
+    EXECUTE PROCEDURE a_removeUserFromPendingFriends();
+
 -- FUNCTION 1: ThreeDegrees
 -- When passed 2 users, finds the shortest path within 3 jumps between the users
 
