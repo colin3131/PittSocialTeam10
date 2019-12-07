@@ -927,10 +927,13 @@ public class PittSocial
 				// Allow user to choose an option
 				Scanner sc = new Scanner(System.in);
 				System.out.print("\nChoose a request to accept [#]: ");
-				if(sc.hasNextInt()){
+				if(sc.hasNextLine()){
 					// Grab the choice
-					int choice = sc.nextInt();
-					sc.nextLine();
+					String choice_str = sc.nextLine();
+					int choice = 10000;
+					try{
+						choice = Integer.parseInt(choice_str);
+					}catch(Exception e){}
 
 					if(choice == 0){ // Deny all requests
 						denyAllRequests(userID);
@@ -1706,9 +1709,12 @@ public class PittSocial
 		Scanner sc = new Scanner(System.in);
 		while(stillViewing){
 			System.out.print("\nEnter a Friend's ID to view their profile, or 0 to return to main menu: ");
-			if(sc.hasNextInt()){
-				int checkid = sc.nextInt();
-				sc.nextLine();
+			if(sc.hasNextLine()){
+				String checkid_str = sc.nextLine();
+				int checkid = 10000;
+				try{
+					checkid = Integer.parseInt(checkid_str);
+				}catch(Exception e){}
 				try{
 					if(checkid==0)
 					{ 
