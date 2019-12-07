@@ -506,21 +506,12 @@ CREATE OR REPLACE FUNCTION search_user (strings text[])
     DECLARE
         str text := 'test';
         i int := 1;
---         rec record;
---         cur_prof cursor(sub text)
---             for SELECT name as username,email as useremail FROM profile where name LIKE '%' || sub || '%' or email LIKE '%' || sub || '%';
     BEGIN
         str := strings[i];
         WHILE str is not NULL
         LOOP
-        str := strings[i];
---             OPEN cur_prof(strings[i]);
---             LOOP
---                 FETCH cur_prof into rec;
---                 EXIT WHEN rec IS NULL;
-                RETURN QUERY SELECT name as username,email as useremail FROM profile where name LIKE '%' || strings[i] || '%' or email LIKE '%' || strings[i] || '%';
---             END LOOP;
---             close cur_prof;
+            str := strings[i];
+            RETURN QUERY SELECT name as username,email as useremail FROM profile where name LIKE '%' || strings[i] || '%' or email LIKE '%' || strings[i] || '%';
             i := i + 1;
         end loop;
         RETURN;
