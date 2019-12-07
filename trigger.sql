@@ -262,9 +262,8 @@ BEGIN
         FETCH cur_groupMembers INTO rec_groupMember;
         EXIT WHEN NOT FOUND;
 
-        IF (NEW.fromid != rec_groupMember.userID) THEN
         INSERT INTO messageRecipient VALUES(NEW.msgID, rec_groupMember.userID);
-        END IF;
+
     END LOOP;
     CLOSE cur_groupMembers;
     RETURN NEW;
