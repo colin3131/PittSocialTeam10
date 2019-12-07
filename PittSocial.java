@@ -1953,7 +1953,7 @@ public class PittSocial
 	
 			System.out.println("\nHere is the current time minus " + x + " months: " + xTime);
 	
-			String SQL = "SELECT fromid, count(fromid) AS totalMessages FROM messageinfo WHERE touserid=? AND timesent>? GROUP BY fromid ORDER BY totalMessages DESC LIMIT ?";
+			String SQL = "SELECT profile, SUM(fromCount + toCount) AS messages FROM topK(?,?,?) GROUP BY profile";
 	
 			try{
 				Connection conn = connect();
@@ -1965,9 +1965,9 @@ public class PittSocial
 	
 				while(rs.next())
 					{
-						tempUser = getUserName(rs.getInt("fromid"));
-						numMessages = rs.getInt("totalMessages");
-						System.out.println("Position " + pos + " : "+ tempUser +" with "+ numMessages +" messages.");
+						tempUser = getUserName(rs.getInt("profile"));
+						numMessages = rs.getInt("messages");
+						System.out.println("Position " + pos + " : "+ tempUser +" with "+ numMessages +" messages between the 2 of you");
 						pos++;
 					}
 					System.out.println("");
