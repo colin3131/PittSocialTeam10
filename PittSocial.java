@@ -1611,13 +1611,40 @@ public class PittSocial
 				tempmessage = rs.getString("message");
 				System.out.println(tempmessage + "\n");
 			}
-			System.out.println(" ----------------------------------- \n");
 		}
 		catch(Exception e)
 		{
 			System.out.println(e.getMessage());
 			System.out.println("Getting your messages failed try again later");
 		}
+		
+		// Now Group Messages
+		SQL = "SELECT message,fromid,togroupid FROM messageinfo WHERE touserid is NULL";
+		int group = 0;
+		
+		try (Connection conn = connect();
+                Statement stmt = conn.createStatement();
+                ResultSet rs = stmt.executeQuery(SQL)) 
+		{
+			while(rs.next())
+			{
+				group = rs.getInt("togroupid");
+				if(userInGroup(group, userID))
+				{
+					fromId = rs.getInt("fromid");
+					fromUser = getUserName(fromId);
+					System.out.println("Message from " + fromUser + " in Group " + group + ": ");
+					tempmessage = rs.getString("message");
+					System.out.println(tempmessage + "\n");
+				}
+			}
+		}
+		catch(Exception e)
+		{
+			System.out.println(e.getMessage());
+			System.out.println("Getting your messages failed try again later");
+		}
+		System.out.println(" ----------------------------------- \n");
 		
 	}
 	
@@ -1803,7 +1830,7 @@ public class PittSocial
 		String tempEmail ="";
 		Scanner sc = new Scanner(System.in);
 	
-		System.out.print("Enter what you want to search a profile for ");
+		System.out.print("Enter what you want to search a profile for: ");
 		tempuser = sc.nextLine();
 		tempuser = "%" + tempuser + "%";
 		String[] split = tempuser.split(" ");
@@ -1823,7 +1850,8 @@ public class PittSocial
 			pstmt.setArray(1, array);
 		
 			ResultSet rs = pstmt.executeQuery();
-			System.out.print("List of Users found in our system related to search ------------------ \n\n");
+			System.out.println("List of Users found in our system related to search");
+			System.out.println(" ---------------------------------- ");
 			while(rs.next())
 				{	
 					
