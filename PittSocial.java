@@ -9,7 +9,7 @@ import java.util.ArrayList;
 /** This is the PittSocial 1555 Application
  * 
  * GROUP #: 10
- * MEMBERS: JAD285, [FILL IN], [FILL IN]
+ * MEMBERS: JAD285, JJZ19, CPS38
  */
 public class PittSocial 
 {

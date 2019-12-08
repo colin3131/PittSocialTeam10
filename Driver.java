@@ -1,3 +1,7 @@
+// PITT SOCIAL TEAM 10
+// Jonathan Zdobinski, Jake Diecidue, and Colin Spratt
+// jjz19, jad285, cps38
+
 import java.sql.*;
 import java.text.ParseException;
 import java.util.Calendar;
