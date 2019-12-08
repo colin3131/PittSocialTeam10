@@ -11,61 +11,78 @@ public class Driver
 {
     public static String url = "jdbc:postgresql://localhost:5432/";
     public static String userDBMS = "postgres";
-    public static String passwordDBMS = "anastasiap05@";
+    public static String passwordDBMS = "admin";
     public static void main(String[] args) throws Exception
     {
         // Test Creation
+        System.out.println("\n\n ------------ Create User (TestUser5) ------------\n\n");
         TestCreate();
         printTable("profile");
 
         // Display Messages
+        System.out.println("\n\n ------------ Display Messages (Shenoda) ------------\n\n");
         TestDisplayMessages();
 
         // Display Friends
+        System.out.println("\n\n ------------ Display Friends (Shenoda) ------------\n\n");
         TestDisplayFriends();
 
         // Three Degrees
+        System.out.println("\n\n ------------ Three Degrees (Shenoda) ------------\n\n");
         TestThreeDegrees();
 
-        // Drop User
-        TestDropUser();
-        printTable("profile");
-        printTable("messageinfo");
-        printTable("groupmember");
-        printTable("friend");
-
         // Initiate Friendship
+        System.out.println("\n\n ------------ Initiate Friendship (Shenoda) ------------\n\n");
         TestInitiateFriendshipPt1();
         printTable("pendingfriend");
 
         // Confirm Request
+        System.out.println("\n\n ------------ Confirm Requests (Peter) ------------\n\n");
         TestInitiateFriendshipPt2();
         printTable("pendingfriend");
         printTable("friend");
       
         // Create Group
+        System.out.println("\n\n ------------ Create Group (Shenoda) ------------\n\n");
         createGroup();
         printTable("groupinfo");
       
         // Send Message To User
+        System.out.println("\n\n ------------ Send Message to User (Shenoda) ------------\n\n");
         smtu();
         printTable("messageinfo");
         printTable("messagerecipient");
       
         // Send Message To Group
+        System.out.println("\n\n ------------ Send Message to Group (Shenoda) ------------\n\n");
         smtg();
         printTable("messageinfo");
         printTable("messagerecipient");
+
         // dispplay new messages
+        System.out.println("\n\n ------------ Display New Messages (Shenoda) ------------\n\n");
         newMessages();
+
         // search for user
+        System.out.println("\n\n ------------ Search For User (Shenoda) ------------\n\n");
         searchUser();
+
         // display top messages
+        System.out.println("\n\n ------------ Top Messages (Shenoda) ------------\n\n");
         topMessages();
+
         // initiate adding group
+        System.out.println("\n\n ------------ Initiate Adding Group (Lory) ------------\n\n");
         initiateGroup();
         printTable("pendinggroupmember");
 
+        // Drop User
+        System.out.println("\n\n ------------ Drop User (Yaw) ------------\n\n");
+        TestDropUser();
+        printTable("profile");
+        printTable("messageinfo");
+        printTable("groupmember");
+        printTable("friend");
     }
 
     public static void setInput(String input){
@@ -167,7 +184,7 @@ public class Driver
 
     // DB Login String
     public static String DBLogin(){
-        return "postgres" + System.getProperty("line.separator") + "anastasiap05@" + System.getProperty("line.separator");
+        return userDBMS + System.getProperty("line.separator") + passwordDBMS + System.getProperty("line.separator");
     }
 
     // Test Runner
@@ -238,8 +255,8 @@ public class Driver
     //adds user to pending group member asking to joing group 1
     public static void initiateGroup() throws Exception
     {
-        String startup = DBLogin() + Login("shg@pitt.edu", "shpwd");
-        String group = "1";
+        String startup = DBLogin() + Login("lra@pitt.edu", "lpwd");
+        String group = "3";
         String message = "TESTING JOING GROUP ONE WITH DRIVER";
     	String path = "1\n2\n"+group+"\n"+message+"\ny\n5\n";
     	String input = startup+path;
