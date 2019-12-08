@@ -153,11 +153,11 @@ public class Driver
     	RunTest(input);
     }
 
-    //search database for users with a string for this the string is 1 2
+    //search database for users with a string for this the string is r, you can change this to whatever you want it to be 
     public static void searchUser() throws Exception
     {
         String startup = DBLogin() + Login("shg@pitt.edu", "shpwd");
-        String search = "1 2";
+        String search = "r";
     	String path = "2\n4\n"+search+"\n5\n";
     	String input = startup+path;
     	RunTest(input);
