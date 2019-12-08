@@ -27,6 +27,7 @@ public class Driver
     }
 
     public static void printTable(String tablename){
+        System.out.println("\n\n ----------------- Printing Table " + tablename + " -----------------");
         try{
             Connection conn = connect();
             Statement statement = conn.createStatement();
@@ -44,6 +45,7 @@ public class Driver
         }catch(Exception e){
             System.out.println(e.getMessage());
         }
+        System.out.println("---------------------------------------------------\n\n");
     }
 
     public static Connection connect() throws SQLException 
