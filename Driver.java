@@ -11,7 +11,7 @@ public class Driver
 {
     public static String url = "jdbc:postgresql://localhost:5432/";
     public static String userDBMS = "postgres";
-    public static String passwordDBMS = "Smoke7889";
+    public static String passwordDBMS = "anastasiap05@";
     public static void main(String[] args) throws Exception
     {
         // Test Creation
@@ -31,6 +31,16 @@ public class Driver
         smtg();
         printTable("messageinfo");
         printTable("messagerecipient");
+        // dispplay new messages
+        newMessages();
+        // search for user
+        searchUser();
+        // display top messages
+        topMessages();
+        // initiate adding group
+        initiateGroup();
+        printTable("pendinggroupmember");
+
     }
 
     public static void setInput(String input){
@@ -97,7 +107,7 @@ public class Driver
 
     // DB Login String
     public static String DBLogin(){
-        return "postgres" + System.getProperty("line.separator") + "Smoke7889" + System.getProperty("line.separator");
+        return "postgres" + System.getProperty("line.separator") + "anastasiap05@" + System.getProperty("line.separator");
     }
 
     // Test Runner
@@ -133,4 +143,48 @@ public class Driver
     	String input = startup+path;
     	RunTest(input);
     }
+
+    //display new messages since login
+    public static void newMessages() throws Exception
+    {
+    	String startup = DBLogin() + Login("shg@pitt.edu", "shpwd");
+    	String path = "3\n4\n5\n";
+    	String input = startup+path;
+    	RunTest(input);
+    }
+
+    //search database for users with a string for this the string is 1 2
+    public static void searchUser() throws Exception
+    {
+        String startup = DBLogin() + Login("shg@pitt.edu", "shpwd");
+        String search = "1 2";
+    	String path = "2\n4\n"+search+"\n5\n";
+    	String input = startup+path;
+    	RunTest(input);
+    }
+
+    //get the top messages to and from users with in the specified statement we are viewing top 10 in the past 200 months
+    public static void topMessages() throws Exception
+    {
+        String startup = DBLogin() + Login("shg@pitt.edu", "shpwd");
+        //10 and 200 are x and k if you want to change them
+        String numOfUsers = "10";
+        String monthsBack = "200";
+    	String path = "3\n5\n"+numOfUsers+"\n"+monthsBack+"\n5\n";
+    	String input = startup+path;
+    	RunTest(input);
+    }
+
+    //adds user to pending group member asking to joing group 1
+    public static void initiateGroup() throws Exception
+    {
+        String startup = DBLogin() + Login("shg@pitt.edu", "shpwd");
+        String group = "1";
+        String message = "TESTING JOING GROUP ONE WITH DRIVER";
+    	String path = "1\n2\n"+group+"\n"+message+"\ny\n5\n";
+    	String input = startup+path;
+    	RunTest(input);
+    }
+
+
 }

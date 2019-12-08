@@ -49,3 +49,5 @@ insert into messageRecipient (msgID, userID) values (3,7);
 insert into messageRecipient (msgID, userID) values (4,1);
 insert into messageRecipient (msgID, userID) values (4,2);
 insert into messageRecipient (msgID, userID) values (4,5);
+
+insert into  pendinggroupmember VALUES(1,1,'TESTING JOING GROUP ONE WITH DRIVER');
