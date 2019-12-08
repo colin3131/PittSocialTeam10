@@ -14,20 +14,12 @@ public class Driver
     public static String passwordDBMS = "admin";
     public static void main(String[] args) throws Exception
     {
-        // Startup
-        String startupinput= "postgres\nadmin\n";
-
-        // Create a user
-        String createnew = "2\n";
-        String username = "TestUser\n";
-        String password = "test123\n";
-        String email = "test@email.com\n";
-        String bday = "1997-05-06\n";
-        String leave = "5\n";
-        String input = startupinput+createnew+username+password+email+bday+leave;
-        setInput(input);
-        PittSocial.main(args);
+        // Test Creation
+        TestCreate();
         printTable("profile");
+
+        // Display Messages
+        TestDisplayMessages();
     }
 
     public static void setInput(String input){
@@ -57,5 +49,48 @@ public class Driver
     public static Connection connect() throws SQLException 
 	{
         return DriverManager.getConnection(url, userDBMS, passwordDBMS);
+    }
+
+    public static String Login(String email, String pass){
+        String loginnum = "1"+ System.getProperty("line.separator");
+        String password = pass+ System.getProperty("line.separator");
+        String emailin = email+ System.getProperty("line.separator");
+        return loginnum+emailin+password;
+    }
+
+    // Profile Creation Test
+    public static void TestCreate() throws Exception{
+        // Startup
+        String startupinput= DBLogin();
+
+        // Create a user
+        String createnew = "2"+ System.getProperty("line.separator");
+        String username = "TestUser5"+ System.getProperty("line.separator");
+        String password = "test123"+ System.getProperty("line.separator");
+        String email = "test5@email.com"+ System.getProperty("line.separator");
+        String bday = "1997-05-06"+ System.getProperty("line.separator");
+        String leave = "5"+ System.getProperty("line.separator");
+        String input = startupinput+createnew+username+password+email+bday+leave;
+        RunTest(input);
+    }
+
+    // Display Messages Test
+    public static void TestDisplayMessages() throws Exception{
+        String startup = DBLogin() + Login("shg@pitt.edu", "shpwd");
+        String path = "3\n3\n5\n";
+        String input = startup+path;
+        RunTest(input);
+    }
+
+    // DB Login String
+    public static String DBLogin(){
+        return "postgres" + System.getProperty("line.separator") + "admin" + System.getProperty("line.separator");
+    }
+
+    // Test Runner
+    public static void RunTest(String input) throws Exception{
+        setInput(input);
+        String[] args = {};
+        PittSocial.main(args);
     }
 }
