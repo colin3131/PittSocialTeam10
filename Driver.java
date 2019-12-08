@@ -20,6 +20,28 @@ public class Driver
 
         // Display Messages
         TestDisplayMessages();
+
+        // Display Friends
+        TestDisplayFriends();
+
+        // Three Degrees
+        TestThreeDegrees();
+
+        // Drop User
+        TestDropUser();
+        printTable("profile");
+        printTable("messageinfo");
+        printTable("groupmember");
+        printTable("friend");
+
+        // Initiate Friendship
+        TestInitiateFriendshipPt1();
+        printTable("pendingfriend");
+
+        // Confirm Request
+        TestInitiateFriendshipPt2();
+        printTable("pendingfriend");
+        printTable("friend");
     }
 
     public static void setInput(String input){
@@ -80,6 +102,41 @@ public class Driver
     public static void TestDisplayMessages() throws Exception{
         String startup = DBLogin() + Login("shg@pitt.edu", "shpwd");
         String path = "3\n3\n5\n";
+        String input = startup+path;
+        RunTest(input);
+    }
+
+    public static void TestDisplayFriends() throws Exception{
+        String startup = DBLogin() + Login("shg@pitt.edu", "shpwd");
+        String path = "2\n3\n5\n0\n5\n";
+        String input = startup+path;
+        RunTest(input);
+    }
+
+    public static void TestThreeDegrees() throws Exception{
+        String startup = DBLogin() + Login("shg@pitt.edu", "shpwd");
+        String path = "2\n5\n6\n0\n5\n";
+        String input = startup+path;
+        RunTest(input);
+    }
+
+    public static void TestDropUser() throws Exception{
+        String startup = DBLogin() + Login("yaw@pitt.edu", "ypwd");
+        String path = "4\n2\n3\n";
+        String input = startup+path;
+        RunTest(input);
+    }
+
+    public static void TestInitiateFriendshipPt1() throws Exception{
+        String startup = DBLogin() + Login("shg@pitt.edu", "shpwd");
+        String path = "2\n1\n3\nInitiate Friendship Test\ny\n5\n";
+        String input = startup+path;
+        RunTest(input);
+    }
+
+    public static void TestInitiateFriendshipPt2() throws Exception{
+        String startup = DBLogin() + Login("pdj@pitt.edu", "ppwd");
+        String path = "2\n2\n2\n0\n5\n";
         String input = startup+path;
         RunTest(input);
     }
