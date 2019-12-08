@@ -28,4 +28,4 @@ By Jonathan Zdobinski, Jake Diecidue, and Colin Spratt
 ## About the Driver
  - Runs through every created Function
  - Prints out relevant tables for the respective Function
- - Issue: Display New Messages has to be tested manually (multithreading limitations)
+ - Issue: Display New Messages has to be tested manually (multithreading limitations) 

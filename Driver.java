@@ -15,7 +15,7 @@ public class Driver
 {
     public static String url = "jdbc:postgresql://localhost:5432/";
     public static String userDBMS = "postgres";
-    public static String passwordDBMS = "admin";
+    public static String passwordDBMS = "postgres";
     public static void main(String[] args) throws Exception
     {
         // Test Creation
@@ -64,7 +64,7 @@ public class Driver
         printTable("messagerecipient");
 
         // dispplay new messages
-        System.out.println("\n\n ------------ Display New Messages (Shenoda) ------------\n\n");
+        System.out.println("\n\n ------------ Display New Messages (Shenoda) ------------\n\n"); 
         newMessages();
 
         // search for user
