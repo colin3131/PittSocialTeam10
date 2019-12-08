@@ -20,6 +20,7 @@ public class PittSocial
 	private static String userDBMS;
 	private static String passwordDBMS;
 	private static int userID;
+	private static Scanner sc;
 
 	/** The main class for PittSocial
 	 * @param args - Not used in this application
@@ -27,12 +28,14 @@ public class PittSocial
 	 */
 	public static void main(String[] args) throws Exception 
 	{
+		sc = new Scanner(System.in);
 		startup();
 		while(run)
 		{
 			login_or_create();
 			user_application();
 		}
+		sc.close();
 	}
 	
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////	
@@ -49,11 +52,10 @@ public class PittSocial
 		boolean Connection = false;
 		while(!Connection)
 		{
-			Scanner kbd = new Scanner(System.in);
 			System.out.print("Enter your DBMS username: ");
-			String DBuser = kbd.nextLine();
+			String DBuser = sc.nextLine();
 			System.out.print("Enter your DBMS password: ");
-			String DBpass = kbd.nextLine();
+			String DBpass = sc.nextLine();
 			
 			// auto close connection
 	        try (Connection conn = DriverManager.getConnection("jdbc:postgresql://localhost:5432/", DBuser, DBpass)) 
@@ -91,7 +93,6 @@ public class PittSocial
 	{
 		System.out.println("---- Welcome to PittSocial! ----");
 		System.out.println("");
-		Scanner kbd = new Scanner(System.in);
 		
 		// THE FOLLOWING IS THE MENU FOR LOGIN, CREATE USER, OR EXIT PROGRAM
 		boolean cANDs = false;
@@ -103,7 +104,7 @@ public class PittSocial
 			System.out.println("3: Exit");
 			System.out.println("");
 			System.out.print("--> ");
-			String answer = kbd.nextLine();
+			String answer = sc.nextLine();
 			
 			System.out.println("");
 			if(answer.equals("1"))
@@ -136,11 +137,10 @@ public class PittSocial
 			boolean tryLogin = true;
 			while(tryLogin)
 			{
-				Scanner kbd2 = new Scanner(System.in);
 				System.out.print("Please enter your email: ");
-				String input1 = kbd2.nextLine();
+				String input1 = sc.nextLine();
 				System.out.print("Please enter your password: ");
-				String input2 = kbd2.nextLine();
+				String input2 = sc.nextLine();
 				
 				boolean userExists = login(input1, input2);
 				//userExists = true; // Testing phase so we can get into the server
@@ -161,7 +161,7 @@ public class PittSocial
 					System.out.println("");
 					System.out.print("--> ");
 					
-					String input3 = kbd2.nextLine();
+					String input3 = sc.nextLine();
 					System.out.println("");
 					if(input3.equals("1"))
 					{
@@ -180,15 +180,14 @@ public class PittSocial
 		// The create user process
 		else if(initialize.equals("2"))
 		{
-			Scanner kbd2 = new Scanner(System.in);
 			System.out.print("Please enter a username [Your Name]: ");
-			String usernameInput = kbd2.nextLine();
+			String usernameInput = sc.nextLine();
 			System.out.print("Please enter a password: ");
-			String password = kbd2.nextLine();
+			String password = sc.nextLine();
 			System.out.print("Please enter an email [something@something.$$$: ");
-			String email = kbd2.nextLine();
+			String email = sc.nextLine();
 			System.out.print("Please enter your birthday [YYYY-MM-DD]: ");
-			String birthday = kbd2.nextLine();
+			String birthday = sc.nextLine();
 			
 			boolean created = createUser(usernameInput, password, email, birthday);
 			if(created)
@@ -242,8 +241,7 @@ public class PittSocial
 		System.out.println("");
 		System.out.print("--> ");
 		
-		Scanner kbd = new Scanner(System.in);
-		String input = kbd.nextLine();
+		String input = sc.nextLine();
 		if(input.equals("1"))
 		{
 			group_options();
@@ -283,8 +281,7 @@ public class PittSocial
 		System.out.println("");
 		System.out.print("--> ");
 		
-		Scanner kbd = new Scanner(System.in);
-		String input = kbd.nextLine();
+		String input = sc.nextLine();
 		if(input.equals("1"))
 		{
 			createGroup();
@@ -314,8 +311,7 @@ public class PittSocial
 		System.out.println("");
 		System.out.print("--> ");
 		
-		Scanner kbd = new Scanner(System.in);
-		String input = kbd.nextLine();
+		String input = sc.nextLine();
 		if(input.equals("1"))
 		{
 			initiateFriendship();
@@ -357,8 +353,7 @@ public class PittSocial
 		System.out.println("");
 		System.out.print("--> ");
 		
-		Scanner kbd = new Scanner(System.in);
-		String input = kbd.nextLine();
+		String input = sc.nextLine();
 		if(input.equals("1"))
 		{
 			sendMessageToUser();
@@ -397,8 +392,7 @@ public class PittSocial
 		System.out.println("");
 		System.out.print("--> ");
 		
-		Scanner kbd = new Scanner(System.in);
-		String input = kbd.nextLine();
+		String input = sc.nextLine();
 		if(input.equals("1"))
 		{
 			logout();
@@ -573,7 +567,6 @@ public class PittSocial
 	@SuppressWarnings("rawtypes")
 	private static void initiateFriendship()
 	{
-		Scanner sc = new Scanner(System.in);
 
 		// notValid: Keep the loop running while the input is invalid
 		// requestNotSent: Keep the loop running while no request was sent
@@ -698,11 +691,10 @@ public class PittSocial
 	 */
 	private static void createGroup()
 	{
-		Scanner CGkbd = new Scanner(System.in);
 		System.out.print("Please enter a name for your group: ");
-		String groupName = CGkbd.nextLine();
+		String groupName = sc.nextLine();
 		System.out.print("Please enter a limit for the group [max # of people]: ");
-		String limitString = CGkbd.nextLine();
+		String limitString = sc.nextLine();
 		int limit = 100;
 		try
 		{
@@ -714,7 +706,7 @@ public class PittSocial
 			limit = 100;
 		}
 		System.out.print("Please enter a description of the group: ");
-		String description = CGkbd.nextLine();
+		String description = sc.nextLine();
 		
 		boolean createdGroup = createGroupSub(groupName, limit, description);
 		
@@ -818,7 +810,6 @@ public class PittSocial
 	private static void initiateAddingGroup()
 	{
 		//getting user input for message and group 
-		Scanner sc = new Scanner(System.in);
 
 		// notValid: Keep the loop running while the input is invalid
 		// requestNotSent: Keep the loop running while no request was sent
@@ -925,7 +916,6 @@ public class PittSocial
 				}
 				
 				// Allow user to choose an option
-				Scanner sc = new Scanner(System.in);
 				System.out.print("\nChoose a request to accept [#]: ");
 				if(sc.hasNextLine()){
 					// Grab the choice
@@ -1228,9 +1218,8 @@ public class PittSocial
 	{
 		boolean valid = true;
 		int UIDtosend = 0;
-		Scanner SMTUkbd = new Scanner(System.in);
 		System.out.print("To whom would you like to send a message [User ID]: ");
-		String UIDSend = SMTUkbd.nextLine();
+		String UIDSend = sc.nextLine();
 		
 		try
 		{
@@ -1244,7 +1233,7 @@ public class PittSocial
 			else
 			{
 				System.out.print("Sending message to " + username + ": is this correct [Yes/No]? ");
-				String sendornaw = SMTUkbd.nextLine();
+				String sendornaw = sc.nextLine();
 				if(sendornaw.equals("Yes"))
 				{
 					valid = true;
@@ -1280,16 +1269,16 @@ public class PittSocial
 				if(areFriends)
 				{
 					System.out.print("Please enter the message to send: ");
-					String message = SMTUkbd.nextLine();
+					String message = sc.nextLine();
 					boolean continueMessage = true;
 					while(continueMessage)
 					{
 						System.out.println("Continue typing message? [Yes/No]");
-						String answer = SMTUkbd.nextLine();
+						String answer = sc.nextLine();
 						if(answer.equals("Yes"))
 						{
 							System.out.println("Please enter the next part of the message: ");
-							String input = SMTUkbd.nextLine();
+							String input = sc.nextLine();
 							message = message.concat(" ");
 							message = message.concat(input);
 						}
@@ -1301,7 +1290,7 @@ public class PittSocial
 					
 					System.out.println("Your message is as follows: " + message);
 					System.out.print("Do you want to send this message [Yes/No]?: ");
-					String input2 = SMTUkbd.nextLine();
+					String input2 = sc.nextLine();
 					if(input2.equals("Yes"))
 					{
 						sendMessageToUserSub(UIDtosend, message);
@@ -1409,9 +1398,8 @@ public class PittSocial
 	{
 		boolean valid = true;
 		int GIDtosend = 0;
-		Scanner SMTGkbd = new Scanner(System.in);
 		System.out.print("To what group would you like to send a message [Group ID]: ");
-		String GIDSend = SMTGkbd.nextLine();
+		String GIDSend = sc.nextLine();
 		
 		try
 		{
@@ -1430,7 +1418,7 @@ public class PittSocial
 				if(inGroup)
 				{
 					System.out.print("Sending message to " + groupname + ": is this correct [Yes/No]? ");
-					String sendornaw = SMTGkbd.nextLine();
+					String sendornaw = sc.nextLine();
 					if(sendornaw.equals("Yes"))
 					{
 						valid = true;
@@ -1457,16 +1445,16 @@ public class PittSocial
 		if(valid)
 		{
 			System.out.print("Please enter the message to send: ");
-			String message = SMTGkbd.nextLine();
+			String message = sc.nextLine();
 			boolean continueMessage = true;
 			while(continueMessage)
 			{
 				System.out.println("Continue typing message? [Yes/No]");
-				String answer = SMTGkbd.nextLine();
+				String answer = sc.nextLine();
 				if(answer.equals("Yes"))
 				{
 					System.out.print("Please enter the next part of the message: ");
-					String input = SMTGkbd.nextLine();
+					String input = sc.nextLine();
 					message = message.concat(" ");
 					message = message.concat(input);
 				}
@@ -1478,7 +1466,7 @@ public class PittSocial
 			
 			System.out.println("Your message is as follows: " + message);
 			System.out.print("Do you want to send this message [Yes/No]?: ");
-			String input2 = SMTGkbd.nextLine();
+			String input2 = sc.nextLine();
 			if(input2.equals("Yes"))
 			{
 				sendMessageToGroupSub(GIDtosend, message);
@@ -1763,7 +1751,6 @@ public class PittSocial
 			System.out.println("Cannot find friends.");
 		}
 		boolean stillViewing = true;
-		Scanner sc = new Scanner(System.in);
 		while(stillViewing){
 			System.out.print("\nEnter a Friend's ID to view their profile, or 0 to return to main menu: ");
 			if(sc.hasNextLine()){
@@ -1858,7 +1845,6 @@ public class PittSocial
 		boolean founduser = false;
 		String tempuserCheck = "";
 		String tempEmail ="";
-		Scanner sc = new Scanner(System.in);
 	
 		System.out.print("Enter what you want to search a profile for: ");
 		tempuser = sc.nextLine();
@@ -1908,7 +1894,6 @@ public class PittSocial
 	private static void threeDegress()
 	{
 		boolean loop = true;
-		Scanner sc = new Scanner(System.in);
 		System.out.println("\nFind the shortest (max 3) friendship path between you and another user.\n");
 		while(loop){
 			System.out.print("Enter a User ID, or 0 to exit: ");
@@ -1964,7 +1949,6 @@ public class PittSocial
 	{
 		String tempUser = "";
 		int numMessages = 0;
-		Scanner sc = new Scanner(System.in);
 		Timestamp xTime = new Timestamp(System.currentTimeMillis());
 		System.out.print("Please enter the amount of top users you wish to see: ");
 		String kk = sc.nextLine();
