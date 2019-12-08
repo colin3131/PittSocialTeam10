@@ -11,7 +11,7 @@ public class Driver
 {
     public static String url = "jdbc:postgresql://localhost:5432/";
     public static String userDBMS = "postgres";
-    public static String passwordDBMS = "admin";
+    public static String passwordDBMS = "Smoke7889";
     public static void main(String[] args) throws Exception
     {
         // Test Creation
@@ -20,6 +20,17 @@ public class Driver
 
         // Display Messages
         TestDisplayMessages();
+        // Create Group
+        createGroup();
+        printTable("groupinfo");
+        // Send Message To User
+        smtu();
+        printTable("messageinfo");
+        printTable("messagerecipient");
+        // Send Message To Group
+        smtg();
+        printTable("messageinfo");
+        printTable("messagerecipient");
     }
 
     public static void setInput(String input){
@@ -84,7 +95,7 @@ public class Driver
 
     // DB Login String
     public static String DBLogin(){
-        return "postgres" + System.getProperty("line.separator") + "admin" + System.getProperty("line.separator");
+        return "postgres" + System.getProperty("line.separator") + "Smoke7889" + System.getProperty("line.separator");
     }
 
     // Test Runner
@@ -92,5 +103,32 @@ public class Driver
         setInput(input);
         String[] args = {};
         PittSocial.main(args);
+    }
+    
+    // Create Group Test
+    public static void createGroup() throws Exception
+    {
+    	String startup = DBLogin() + Login("shg@pitt.edu", "shpwd");
+    	String path = "1\n1\nNEWTESTGROUP\n10\nTHIS IS A TEST GROUP\n5\n";
+    	String input = startup+path;
+    	RunTest(input);
+    }
+    
+    // Send Message To User
+    public static void smtu() throws Exception
+    {
+    	String startup = DBLogin() + Login("shg@pitt.edu", "shpwd");
+    	String path = "3\n1\n2\nYes\nTHIS IS A TEST MESSAGE TO USER\nNo\nYes\n5\n";
+    	String input = startup+path;
+    	RunTest(input);
+    }
+    
+    // Send Message To Group
+    public static void smtg() throws Exception
+    {
+    	String startup = DBLogin() + Login("shg@pitt.edu", "shpwd");
+    	String path = "3\n2\n1\nYes\nTHIS IS A TEST MESSAGE TO GROUP\nNo\nYes\n5\n";
+    	String input = startup+path;
+    	RunTest(input);
     }
 }
